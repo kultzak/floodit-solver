@@ -1,0 +1,115 @@
+Equipe:
+=======
+
+O trabalho  pode ser feito  em grupos de até  2 alunos de  graduação e
+individual para os alunos de pós.
+
+
+Tema:
+=====
+
+Implementar um programa em C que  recebe como entrada uma instância do
+jogo Floodit e que gera como saída  uma sequência de cores que pinta o
+tabuleiro todo com uma única cor.
+
+
+Entrega:
+========
+
+O trabalho deve ser entregue por email para fabiano at inf.ufpr.br até
+23:59 do dia da entrega do trabalho.
+
+O  email deve  conter a  identificação completa  dos alunos  da equipe
+(nome completo, GRR e login no  sistema) e um arquivo .tar.gz em anexo
+contendo:  o código  fonte, makefile  e leiame.txt,  este último  deve
+conter detalhes que possam ser relevantes na avaliação do trabalho.
+
+
+Especificação:
+==============
+
+O seu programa deve receber uma  instância do jogo a partir da entrada
+padrão do sistema.
+
+Uma instância é dada por um arquivo texto no seguinte formato:
+
+  - a  primeira linha  do arquivo  tem 3  números inteiros  n, m  e k,
+    separados por espaço, onde n é  o número de linhas do tabuleiro, m
+    é  o número  de colunas  do  tabuleiro e  k  é o  número de  cores
+    presentes no tabuleiro;
+
+  - o restante do arquivo contém n linhas com m números inteiros cada,
+    separados por espaços,  sendo que cada um  destes valores pertence
+    ao intervalo [1..k];
+
+  - o exemplo abaixo é uma instância do jogo com 4 linhas, 5 colunas e
+    3 cores:
+  
+    4 5 3
+    2 3 2 3 2 
+    2 1 2 3 3 
+    3 1 2 3 2 
+    1 2 2 1 3 
+
+A saída do seu  programa deve ser pela saída padrão  do sistema e deve
+conter duas linhas  de texto:
+
+  - a  primeira linha  deve  conter  um número  inteiro  que indica  o
+    tamanho da sequencia de números da segunda linha;
+
+  - a  segunda linha  deve conter  uma sequência  de números  inteiros
+    pertencentes ao intervalo [1..k], separados por espaço e terminada
+    por uma quebra de linha.
+
+Esta sequência representa as cores que  devem ser usadas para pintar o
+tabuleiro com  uma única  cor.  A  operação de pintura  muda a  cor da
+região que contém a célula do canto superior esquerdo do tabulerio.
+
+Por exemplo, considere a seguinte sequência de cores, para o tabuleiro
+dado como exemplo:
+
+  5
+  3 2 1 3 2
+
+Ao aplicar a  operação de pintura, usando esta sequência  de cores, as
+seguintes transformações ocorrem no tabuleiro:
+
+Pintar com a cor 3:
+
+  3 3 2 3 2 
+  3 1 2 3 3 
+  3 1 2 3 2 
+  1 2 2 1 3 
+
+Pintar com a cor 2:
+
+  2 2 2 3 2 
+  2 1 2 3 3 
+  2 1 2 3 2 
+  1 2 2 1 3 
+
+Pintar com a cor 1:
+
+  1 1 1 3 2 
+  1 1 1 3 3 
+  1 1 1 3 2 
+  1 1 1 1 3
+
+Pintar com a cor 3:
+
+  3 3 3 3 2 
+  3 3 3 3 3 
+  3 3 3 3 2 
+  3 3 3 3 3 
+
+Pintar com a cor 2:
+
+  2 2 2 2 2 
+  2 2 2 2 2 
+  2 2 2 2 2 
+  2 2 2 2 2
+
+Note  que ao  final  o tabuleiro  tem uma  única  cor. Portanto,  esta
+sequência resolve a instância dada como exemplo.
+
+
