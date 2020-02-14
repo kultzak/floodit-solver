@@ -1,2 +1,2 @@
 # floodit-solver
-floodit game solvers
+genetic algorithm to solve a floodit game
