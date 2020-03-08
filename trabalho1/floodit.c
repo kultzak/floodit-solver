@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-// #include "mapa.h"
+#include "mapa.h"
 #include <unistd.h>
 /* compile with gcc -lncurses file.c */
 
@@ -11,8 +11,6 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #define CTRLD 4
 
-
-
 char *choices[] = {
 	"Play",
 	"Peep how AG play",
@@ -21,11 +19,18 @@ char *choices[] = {
 	"Exit",
 	(char *)NULL,
 };
+void print_menu();
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color);
+void play_game();
 
 int main()
 {
-	initscr(); 
+	print_menu();
+}
+
+void print_menu()
+{
+	initscr();
 	curs_set(0);
 	// int row,col;
 	// getmaxyx(stdscr,row,col);
@@ -35,7 +40,6 @@ int main()
 	WINDOW *my_menu_win;
 	WINDOW *my_menu_win2;
 	int n_choices, i;
-	
 
 	/* Initialize curses */
 	initscr();
@@ -53,6 +57,7 @@ int main()
 	for (i = 0; i < n_choices; ++i)
 		my_items[i] = new_item(choices[i], "");
 	my_items[n_choices] = (ITEM *)NULL;
+	item_opts_off(my_items[1], O_SELECTABLE);
 	item_opts_off(my_items[2], O_SELECTABLE);
 	item_opts_off(my_items[3], O_SELECTABLE);
 
@@ -86,8 +91,6 @@ int main()
 	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
 	refresh();
 
-
-
 	/* Post the menu */
 	mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
 	mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F2 to Exit)");
@@ -111,11 +114,28 @@ int main()
 			wclrtoeol(my_menu_win2);
 			mvwprintw(my_menu_win2, 1, 1, "Item selected is : %s",
 					  item_name(current_item(my_menu)));
-			box(my_menu_win2, 0, 0);
-			refresh();
-			pos_menu_cursor(my_menu);
-			break;
+			switch (item_index(current_item(my_menu)))
+			{
+			case 0:
+				werase(my_menu_win2); //clear windoow2 output before going to play
+				refresh();
+				endwin();
+
+				play_game();
+
+				system("clear");
+				break;
+			default:
+				break;
+			}
 		}
+		/*Reprinting some items*/
+		mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
+		mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F2 to Exit)");
+		box(my_menu_win, 0, 0);
+		box(my_menu_win2, 0, 0);
+		refresh();
+		pos_menu_cursor(my_menu);
 		wrefresh(my_menu_win);
 		wrefresh(my_menu_win2);
 	}
@@ -152,51 +172,98 @@ void print_in_middle(WINDOW *win, int starty, int startx, int width, char *strin
 	refresh();
 }
 
-// int main(int argc, char **argv) {
-//   int cor;
-//   tmapa m;
-//   int semente;
+void play_game()
+{
+	int cor;
+	tmapa m;
+	int semente;
+	// WINDOW *my_menu_win3;
 
-//   if(argc < 4 || argc > 5) {
-//     printf("uso: %s <numero_de_linhas> <numero_de_colunas> <numero_de_cores> [<semente_aleatoria>]\n", argv[0]);
-//     exit(1);
-//   }
+	printf("\033c");
 
-// int main (void)
+	// my_menu_win3 = newwin(10, 40, 4, 4);
+	// box(my_menu_win3, 0, 0);
+	// wrefresh(my_menu_win3);
+	// refresh();
 
+	printf("informe o numero de linhas: ");
+	scanf("%i", &m.nlinhas);
+
+	printf("informe o numero de colunas: ");
+	scanf("%i", &m.ncolunas);
+
+	printf("informe o numero de cores: ");
+	scanf("%i", &m.ncores);
+
+	// if (argc == 5)
+	// 	semente = atoi(argv[4]);
+	// else
+	semente = 0;
+	gera_mapa(&m, semente);
+
+	cor = m.mapa[0][0];
+
+	while (cor != -1)
+	{
+		printf("\033c");
+
+		printf("type -1 to exit\n\n");
+
+		pinta_mapa(&m, cor);
+		mostra_mapa_cor(&m);
+		scanf("%d", &cor);
+	}
+	// return 0;
+}
+
+// int main(int argc, char **argv)
 // {
-//         int c = 0;
-//         /* Init ncurses mode */
-//         initscr ();
-//         /* Hide cursor */
-//         curs_set (0);
-//         while (c < 20) {
-//                 /* Print at row 0, col 0 */
-//                 mvprintw (0, 0, "%d", c++);
-//                 refresh ();
-//                 sleep (10);
-//         }
-//         /* End ncurses mode */
-//         endwin();
-//         return 0;
+// 	int cor;
+// 	tmapa m;
+// 	int semente;
+
+// 	if (argc < 4 || argc > 5)
+// 	{
+// 		printf("uso: %s <numero_de_linhas> <numero_de_colunas> <numero_de_cores> [<semente_aleatoria>]\n", argv[0]);
+// 		exit(1);
+// 	}
+
+// 	m.nlinhas = atoi(argv[1]);
+// 	m.ncolunas = atoi(argv[2]);
+// 	m.ncores = atoi(argv[3]);
+
+// 	if (argc == 5)
+// 		semente = atoi(argv[4]);
+// 	else
+// 		semente = 0;
+// 	gera_mapa(&m, semente);
+
+// 	cor = m.mapa[0][0];
+
+// 	while (cor != -1)
+// 	{
+// 		pinta_mapa(&m, cor);
+// 		mostra_mapa_cor(&m);
+// 		scanf("%d", &cor);
+// 	}
+// 	return 0;
 // }
 
-// m.nlinhas = atoi(argv[1]);
-// m.ncolunas = atoi(argv[2]);
-// m.ncores = atoi(argv[3]);
+// // int main (void)
 
-// if(argc == 5)
-//   semente = atoi(argv[4]);
-// else
-//   semente = 0;
-// gera_mapa(&m, semente);
-
-// cor = m.mapa[0][0];
-
-// while(cor != -1) {
-//   pinta_mapa(&m, cor);
-//   mostra_mapa_cor(&m);
-//   scanf("%d", &cor);
-// }
-// return 0;
-// }
+// // {
+// //         int c = 0;
+// //         /* Init ncurses mode */
+// //         initscr ();
+// //         /* Hide cursor */
+// //         curs_set (0);
+// //         while (c < 20) {
+// //                 /* Print at row 0, col 0 */
+// //                 mvprintw (0, 0, "%d", c++);
+// //                 refresh ();
+// //                 sleep (10);
+// //         }
+// //         /* End ncurses mode */
+// //         endwin();
+// //         return 0;
+// // }
