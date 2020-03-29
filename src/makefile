@@ -6,7 +6,8 @@ util: geramapa verifica anima
 
 heuristicas: floodit_h1 floodit_h2 floodit_h3 floodit_h4 floodit_h5
 
-floodit: mapa.h mapa.c floodit.c -lmenu -lncurses #install "sudo apt install libncurses5-dev libncursesw5-dev"
+floodit: mapa.h mapa.c floodit.c -lmenu -lncurses libprogressbar.so #install "sudo apt install libncurses5-dev libncursesw5-dev"
+#need to compile liprogressbar to use, or libstatusbar 
 # floodit: -lmenu -lncurses floodit.c  #install "sudo apt install libncurses5-dev libncursesw5-dev"
 
 floodit_h1: mapa.h mapa.c floodit_h1.c

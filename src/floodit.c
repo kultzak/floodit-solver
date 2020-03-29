@@ -8,20 +8,28 @@
 #include <curses.h>
 #include <menu.h>
 
+/* progressbar */
+#include "include/progressbar/progressbar.h"
+#include "include/progressbar/statusbar.h"
+
+#define SLEEP_US 100000
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #define CTRLD 4
 
 char *choices[] = {
 	"Play",
+	"How to Play",
 	"Peep how AG play",
-	"Peep how ...",
-	"Play against",
+	// "Play against",
+	"Options",
 	"Exit",
 	(char *)NULL,
 };
 void print_menu();
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color);
 void play_game();
+void ag_play();
 
 int main()
 {
@@ -58,7 +66,7 @@ void print_menu()
 		my_items[i] = new_item(choices[i], "");
 	my_items[n_choices] = (ITEM *)NULL;
 	item_opts_off(my_items[1], O_SELECTABLE);
-	item_opts_off(my_items[2], O_SELECTABLE);
+	// item_opts_off(my_items[2], O_SELECTABLE);
 	item_opts_off(my_items[3], O_SELECTABLE);
 
 	/* Crate menu */
@@ -123,7 +131,14 @@ void print_menu()
 
 				play_game();
 
-				system("clear");
+				break;
+			case 2:
+				werase(my_menu_win2); //clear windoow2 output before going to play
+				refresh();
+				endwin();
+
+				ag_play();
+
 				break;
 			default:
 				break;
@@ -186,13 +201,13 @@ void play_game()
 	// wrefresh(my_menu_win3);
 	// refresh();
 
-	printf("informe o numero de linhas: ");
+	printf("enter the number of lines: ");
 	scanf("%i", &m.nlinhas);
 
-	printf("informe o numero de colunas: ");
+	printf("enter the number of columns: ");
 	scanf("%i", &m.ncolunas);
 
-	printf("informe o numero de cores: ");
+	printf("enter the number of colors: ");
 	scanf("%i", &m.ncores);
 
 	// if (argc == 5)
@@ -213,7 +228,23 @@ void play_game()
 		mostra_mapa_cor(&m);
 		scanf("%d", &cor);
 	}
+	system("clear");
+
 	// return 0;
+}
+
+void ag_play()
+{
+	// Progress bar
+    int max = 20;
+    progressbar *smooth = progressbar_new("Smooth",max);
+    for(int i=0; i < max; i++) {
+        usleep(SLEEP_US);
+        progressbar_inc(smooth);
+    }
+    progressbar_finish(smooth);
+
+	system("clear");
 }
 
 // int main(int argc, char **argv)
