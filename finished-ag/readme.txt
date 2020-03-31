@@ -24,9 +24,9 @@ positions of the solution.
 element (colour) is removed.
 
 
-2) In problems with small trays (30 30 10) the population sizes that suffer
+2) In problems with small boards (30 30 10) the population sizes that suffer
 local search as well as recombination and disruption influence the getting
-better results in 120 seconds. But on trays large (50 50 10) and (100 100 10)
+better results in 120 seconds. But on boards large (50 50 10) and (100 100 10)
 flags were created in the algorithm for disregarding time perturbation and
 recombination, tests with 300 seconds of execution showed a greater efficiency
 of a simple local search in the best results of the initial population. The time
@@ -46,10 +46,10 @@ formation.
 	t_search = 20; //number of individuals in local search
 
 the flag and t_search values are automatically set to 5 and 1 in the case of
-trays with line > 49 and > 99 respectively
+boards with line > 49 and > 99 respectively
 
 4) Taking into account the characteristics of the genetic algorithms the
-parameters are set for trays (30 30 10) in which it has been observed as 64 the
+parameters are set for boards (30 30 10) in which it has been observed as 64 the
 minimum number of moves for the board provided by the teacher and values below
-that on similar trays. However the The approach does not guarantee efficient
+that on similar boards. However the The approach does not guarantee efficient
 generic application.

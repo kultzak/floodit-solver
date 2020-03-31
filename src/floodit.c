@@ -20,7 +20,7 @@
 char *choices[] = {
 	"Play",
 	"How to Play",
-	"Peep how AG play",
+	"Peep how GA play",
 	// "Play against",
 	"Options",
 	"Exit",
@@ -236,15 +236,41 @@ void play_game()
 void ag_play()
 {
 	// Progress bar
-    int max = 20;
-    progressbar *smooth = progressbar_new("Smooth",max);
-    for(int i=0; i < max; i++) {
-        usleep(SLEEP_US);
-        progressbar_inc(smooth);
-    }
-    progressbar_finish(smooth);
+	int max = 20;
+	progressbar *smooth = progressbar_new("Smooth", max);
+	for (int i = 0; i < max; i++)
+	{
+		usleep(SLEEP_US);
+		progressbar_inc(smooth);
+	}
+	progressbar_finish(smooth);
 
+	int i;
+	tmapa m;
+	tplano *p;
+	int intervalo;
+
+	// if (argc > 1)
+	// 	intervalo = atoi(argv[1]);
+	// else
+	intervalo = 100;
+
+	carrega_mapa(&m);
+	p = aloca_plano(&m);
+	carrega_plano(p);
+
+	printf("\033c");
+	mostra_mapa_cor(&m);
+	for (i = 0; i < p->passos; i++)
+	{
+		usleep(1000 * intervalo);
+		pinta_mapa(&m, p->cor[i]);
+		printf("\033c");
+		mostra_mapa_cor(&m);
+	}
 	system("clear");
+	// return 0;
+
 }
 
 // int main(int argc, char **argv)

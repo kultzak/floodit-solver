@@ -190,6 +190,8 @@ void gera_mapa(tmapa *m, int semente) {
 void carrega_mapa(tmapa *m) {
   int i, j;
 
+  printf("insira o mapa: \n");
+
   scanf("%d", &(m->nlinhas));
   scanf("%d", &(m->ncolunas));
   scanf("%d", &(m->ncores));
