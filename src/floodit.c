@@ -12,6 +12,9 @@
 #include "include/progressbar/progressbar.h"
 #include "include/progressbar/statusbar.h"
 
+/*genetic algorithm*/
+#include "floodit_ga.c"
+
 #define SLEEP_US 100000
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
@@ -20,7 +23,7 @@
 char *choices[] = {
 	"Play",
 	"How to Play",
-	"Peep how AG play",
+	"Peep how GA play",
 	// "Play against",
 	"Options",
 	"Exit",
@@ -29,7 +32,7 @@ char *choices[] = {
 void print_menu();
 void print_in_middle(WINDOW *win, int starty, int startx, int width, char *string, chtype color);
 void play_game();
-void ag_play();
+void ga_play();
 
 int main()
 {
@@ -137,7 +140,7 @@ void print_menu()
 				refresh();
 				endwin();
 
-				ag_play();
+				ga_play();
 
 				break;
 			default:
@@ -233,68 +236,49 @@ void play_game()
 	// return 0;
 }
 
-void ag_play()
+void ga_play()
 {
 	// Progress bar
-    int max = 20;
-    progressbar *smooth = progressbar_new("Smooth",max);
-    for(int i=0; i < max; i++) {
-        usleep(SLEEP_US);
-        progressbar_inc(smooth);
-    }
-    progressbar_finish(smooth);
+	int max = 20;
+	progressbar *smooth = progressbar_new("\033cSuave", max);
+	for (int i = 0; i < max; i++)
+	{
+		usleep(SLEEP_US);
+		progressbar_inc(smooth);
+	}
+	progressbar_finish(smooth);
+
+	genetic_algorithm();
+
+	int i;
+	tmapa m;
+	tplano *p;
+	int intervalo;
+	char ch;
+
+	// if (argc > 1)
+	// 	intervalo = atoi(argv[1]);
+	// else
+	intervalo = 100;
+
+	carrega_mapa(&m);
+	p = aloca_plano(&m);
+	carrega_plano(p);
+
+	printf("\033c");
+	mostra_mapa_cor(&m);
+	for (i = 0; i < p->passos; i++)
+	{
+		usleep(1000 * intervalo);
+		pinta_mapa(&m, p->cor[i]);
+		printf("\033c");
+		mostra_mapa_cor(&m);
+	}
+
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer
+	getchar();
 
 	system("clear");
+	// return 0;
 }
-
-// int main(int argc, char **argv)
-// {
-// 	int cor;
-// 	tmapa m;
-// 	int semente;
-
-// 	if (argc < 4 || argc > 5)
-// 	{
-// 		printf("uso: %s <numero_de_linhas> <numero_de_colunas> <numero_de_cores> [<semente_aleatoria>]\n", argv[0]);
-// 		exit(1);
-// 	}
-
-// 	m.nlinhas = atoi(argv[1]);
-// 	m.ncolunas = atoi(argv[2]);
-// 	m.ncores = atoi(argv[3]);
-
-// 	if (argc == 5)
-// 		semente = atoi(argv[4]);
-// 	else
-// 		semente = 0;
-// 	gera_mapa(&m, semente);
-
-// 	cor = m.mapa[0][0];
-
-// 	while (cor != -1)
-// 	{
-// 		pinta_mapa(&m, cor);
-// 		mostra_mapa_cor(&m);
-// 		scanf("%d", &cor);
-// 	}
-// 	return 0;
-// }
-
-// // int main (void)
-
-// // {
-// //         int c = 0;
-// //         /* Init ncurses mode */
-// //         initscr ();
-// //         /* Hide cursor */
-// //         curs_set (0);
-// //         while (c < 20) {
-// //                 /* Print at row 0, col 0 */
-// //                 mvprintw (0, 0, "%d", c++);
-// //                 refresh ();
-// //                 sleep (10);
-// //         }
-// //         /* End ncurses mode */
-// //         endwin();
-// //         return 0;
-// // }
