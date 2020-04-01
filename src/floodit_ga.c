@@ -229,7 +229,7 @@ void selectionSort(tplano arr[], int n)
 	}
 }
 
-int main(int argc, char **argv) {
+int genetic_algorithm() {
 	int i;
 	int j;
 	int aux_cor;
@@ -415,4 +415,8 @@ int main(int argc, char **argv) {
 
 	return 0;
 }
+
+// int main(){
+// 	return genetic_algorithm();
+// }
 

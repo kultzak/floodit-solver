@@ -1,16 +1,16 @@
 CFLAGS = -g -Wall -Wno-unused-result -O3 
 
-all: floodit util heuristicas
+all: floodit util
 
 util: geramapa verifica anima
 
-heuristicas: floodit_ga
+# heuristicas: floodit_ga
 
 floodit: mapa.h mapa.c floodit.c -lmenu -lncurses libprogressbar.so #install "sudo apt install libncurses5-dev libncursesw5-dev"
 #need to compile liprogressbar to use, or libstatusbar 
 # floodit: -lmenu -lncurses floodit.c  #install "sudo apt install libncurses5-dev libncursesw5-dev"
 
-floodit_ga: mapa.h mapa.c floodit_ga.c
+# floodit_ga: mapa.h mapa.c floodit_ga.c
 
 geramapa: mapa.h mapa.c geramapa.c
 
