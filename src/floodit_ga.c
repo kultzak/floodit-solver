@@ -229,7 +229,7 @@ void selectionSort(tplano arr[], int n)
 	}
 }
 
-int genetic_algorithm() {
+tplano genetic_algorithm(tmapa mo) {
 	int i;
 	int j;
 	int aux_cor;
@@ -237,7 +237,7 @@ int genetic_algorithm() {
 	int generation;
 	int g_inc;
 	int *ncorfront;
-	tmapa mo;
+	// tmapa mo;
 	tmapa *md;
 	tfronteira *f;
 	tplano *p;
@@ -266,14 +266,16 @@ int genetic_algorithm() {
 	lambda = 0.1; //diversificador de filhos
 	g_inc = 1; //passo do incremento do diversificador
 	inc = 0.2; // fator de incremento do diversificador
-	time_t seconds = 120; // timer para teste (iniciando depois que a pop_ini é gerada)
+	time_t seconds = 60; // timer para teste (iniciando depois que a pop_ini é gerada)
 	int flag = 1; //0 -> desabilita a recombinação e a perturbação
 	t_busca = 20; //numero de indivíduos da busca local
 
 
 	endwait = start + seconds;
 
-	carrega_mapa(&mo);
+	// printf("insira o tabuleiro: \n");
+	// carrega_mapa(&mo);
+
 	md = aloca_mapa(&mo);
 	srand((unsigned)(time(&t)));
 
@@ -413,7 +415,9 @@ int genetic_algorithm() {
 	// }
 
 
-	return 0;
+
+
+	return ini_pop[0];
 }
 
 // int main(){

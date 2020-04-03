@@ -248,36 +248,37 @@ void ga_play()
 	}
 	progressbar_finish(smooth);
 
-	genetic_algorithm();
-
 	int i;
 	tmapa m;
-	tplano *p;
+	tplano *plan;
 	int intervalo;
-	char ch;
-
-	// if (argc > 1)
-	// 	intervalo = atoi(argv[1]);
-	// else
-	intervalo = 100;
 
 	carrega_mapa(&m);
-	p = aloca_plano(&m);
-	carrega_plano(p);
+	plan = aloca_plano(&m);
+	*plan = genetic_algorithm(m);
+
+	intervalo = 50;
+
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer to see last output
+	getchar();
 
 	printf("\033c");
 	mostra_mapa_cor(&m);
-	for (i = 0; i < p->passos; i++)
+	for (i = 0; i < plan->passos; i++)
 	{
 		usleep(1000 * intervalo);
-		pinta_mapa(&m, p->cor[i]);
+		pinta_mapa(&m, plan->cor[i]);
 		printf("\033c");
 		mostra_mapa_cor(&m);
 	}
 
-	int c;
+	mostra_plano(plan);
+	
 	while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer
 	getchar();
+
+	while ((c = getchar()) != '\n' && c != EOF){} //clear the input buffer after getchar. it avoids errors from last getchar
 
 	system("clear");
 	// return 0;
