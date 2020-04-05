@@ -8,14 +8,9 @@
 #include <curses.h>
 #include <menu.h>
 
-/* progressbar */
-#include "include/progressbar/progressbar.h"
-#include "include/progressbar/statusbar.h"
-
 /*genetic algorithm*/
 #include "floodit_ga.c"
 
-#define SLEEP_US 100000
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #define CTRLD 4
@@ -238,20 +233,12 @@ void play_game()
 
 void ga_play()
 {
-	// Progress bar
-	int max = 20;
-	progressbar *smooth = progressbar_new("\033cSuave", max);
-	for (int i = 0; i < max; i++)
-	{
-		usleep(SLEEP_US);
-		progressbar_inc(smooth);
-	}
-	progressbar_finish(smooth);
-
 	int i;
 	tmapa m;
 	tplano *plan;
 	int intervalo;
+
+	printf("Insert the map!");
 
 	carrega_mapa(&m);
 	plan = aloca_plano(&m);

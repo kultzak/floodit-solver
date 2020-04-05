@@ -4,6 +4,12 @@
 #include <time.h>
 #include <unistd.h>
 
+/* progressbar */
+#include "include/progressbar/progressbar.h"
+#include "include/progressbar/statusbar.h"
+
+#define SLEEP_US 1000000
+
 
 void perturbation(tplano pop[], int ncores)
 {
@@ -336,9 +342,24 @@ tplano genetic_algorithm(tmapa mo) {
 	selectionSort(ini_pop, tam_pop);
 
 //-----------------------//PROCEDIMENTO EVOLUTIVO//-----------------------//
+
+	// Progress bar
+	// int max = 60;
+	long int max  = (long)seconds;
+
+	progressbar *smooth = progressbar_new("\033cSuave", max);
+	for (int i = 0; i < max; i++)
+	{
+		usleep(SLEEP_US);
+		progressbar_inc(smooth);
+	}
+	progressbar_finish(smooth);
+
+
 	while (start < endwait) //função timer para englobar
 	{
 		start = time(NULL);
+		printf("loop time is : %s", ctime(&start));
 
 		if (md->nlinhas > 49) {
 			flag = 0;
@@ -393,6 +414,7 @@ tplano genetic_algorithm(tmapa mo) {
 		printf("\033c");
 
 	}
+
 
 
 //-----------------------//APRESENTA O MELHOR RESULTADO//-----------------------//
