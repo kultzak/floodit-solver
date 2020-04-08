@@ -118,7 +118,7 @@ void print_menu()
 		case 10: /* Enter */
 			wmove(my_menu_win2, 1, 1);
 			wclrtoeol(my_menu_win2);
-			mvwprintw(my_menu_win2, 1, 1, "Item selected is : %s",
+			mvwprintw(my_menu_win2, 1, 1, "%s is disabled",
 					  item_name(current_item(my_menu)));
 			switch (item_index(current_item(my_menu)))
 			{
@@ -244,11 +244,11 @@ void ga_play()
 	plan = aloca_plano(&m);
 	*plan = genetic_algorithm(m);
 
-	intervalo = 50;
+	intervalo = 100;
 
 	int c;
-	while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer to see last output
-	getchar();
+	// while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer to see last output
+	// getchar();
 
 	printf("\033c");
 	mostra_mapa_cor(&m);

@@ -357,7 +357,7 @@ tplano genetic_algorithm(tmapa mo) {
 
 
 
-	progressbar *smooth = progressbar_new("\033cSuave", max); //create progressbar
+	progressbar *smooth = progressbar_new("\033cSolving", max); //create progressbar
 
 	double diff_t = 0;
 	double old_dif = 60;
@@ -440,10 +440,12 @@ tplano genetic_algorithm(tmapa mo) {
 
 //-----------------------//APRESENTA O MELHOR RESULTADO//-----------------------//
 	// printf("\033c");
-	printf("%d\n", ini_pop[0].passos);
-	for (i = 0; i < ini_pop[0].passos; i++)
-		printf("%d ", ini_pop[0].cor[i]);
-	printf("\n");
+
+	// printf("%d\n", ini_pop[0].passos);
+	// for (i = 0; i < ini_pop[0].passos; i++)
+	// 	printf("%d ", ini_pop[0].cor[i]);
+	// printf("\n");
+
 	// printf("start time is : %s", ctime(&start));
 	// printf("end time is %s", ctime(&endwait));
 
