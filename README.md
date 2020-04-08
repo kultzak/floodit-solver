@@ -11,4 +11,4 @@ genetic algorithm to solve a floodit game
 
 ...currently implementing game interface
 
-[Genetic Algorithm](readme_ga.txt)
+[Genetic Algorithm](src/readme_ga.txt)
