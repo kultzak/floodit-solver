@@ -9,6 +9,8 @@ of colors >= 3.
 # floodit-solver
 genetic algorithm to solve a floodit game
 
+![](/src/images/solving.gif)
+
 ...currently implementing game interface
 
 [Genetic Algorithm](src/readme_ga.txt)
