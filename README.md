@@ -13,4 +13,10 @@ genetic algorithm to solve a floodit game
 
 ...currently implementing game interface
 
+from src directory run
+```
+$ make
+$ ./floodit
+```
+
 [Genetic Algorithm](src/readme_ga.txt)
