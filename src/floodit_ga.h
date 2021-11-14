@@ -1,37 +1,39 @@
 #ifndef __FLOODIT_GA_H__
 #define __FLOODIT_GA_H__
 
-typedef struct {
-  int nlinhas;
-  int ncolunas;
-  int ncores;
-  int lmax;
-  int cmax;
-  int **mapa;
-} tmapa;
+#include "mapa.h"
+// typedef struct {
+//   int nlinhas;
+//   int ncolunas;
+//   int ncores;
+//   int lmax;
+//   int cmax;
+//   int **mapa;
+// } tmapa;
 
-typedef struct {
-  int l;
-  int c;
-  int v;
-} tpos;
+// typedef struct {
+//   int l;
+//   int c;
+//   int v;
+// } tpos;
 
-typedef struct {
-  int tamanho;
-  tpos *pos;
-} tfronteira;
+// typedef struct {
+//   int tamanho;
+//   tpos *pos;
+// } tfronteira;
 
-typedef struct {
-  int solucao;
-  int passos;
-  int *cor;
-  float **prob;
-} tplano;
+// typedef struct {
+//   int solucao;
+//   int passos;
+//   int *cor;
+//   float **prob;
+// } tplano;
 
 void insere_plano(tplano*, int);
 void remove_plano(tplano*);
 void copia_plano(tplano*, tplano*);
 tplano* aloca_plano(tmapa*);
+tplano genetic_algorithm(tmapa);
 void libera_plano(tplano*);
 void carrega_plano(tplano*);
 void mostra_plano(tplano*);

@@ -9,7 +9,7 @@
 #include <menu.h>
 
 /*genetic algorithm*/
-#include "floodit_ga.c"
+#include "floodit_ga.h"
 
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
