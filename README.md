@@ -11,7 +11,7 @@ genetic algorithm to solve a floodit game
 
 ![](/src/images/solving.gif)
 
-...currently implementing game interface
+...currently implementing game interface and other solving algorithms
 
 from src directory run
 ```
