@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "mapa.h"
+#include "lib/mapa.h"
   
 int main(int argc, char **argv) {
   tmapa m;

@@ -1,7 +1,7 @@
 #ifndef __FLOODIT_GA_H__
 #define __FLOODIT_GA_H__
 
-#include "mapa.h"
+#include "lib/mapa.h"
 // typedef struct {
 //   int nlinhas;
 //   int ncolunas;

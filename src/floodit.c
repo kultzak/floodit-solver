@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "mapa.h"
+#include "lib/mapa.h"
 #include <unistd.h>
 /* compile with gcc -lncurses file.c */
 
