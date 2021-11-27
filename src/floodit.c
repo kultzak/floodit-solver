@@ -14,7 +14,7 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #define CTRLD 4
 
-void print_footer();
+int termx, termy;
 
 char *choices[] = {
     "Play",
@@ -25,26 +25,21 @@ char *choices[] = {
     "Exit",
     (char *)NULL,
 };
+void terminal_start();
 void print_menu();
+void print_footer();
 void print_in_middle(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
 void play_game();
 void ga_play();
+void initialize_menu();
+void get_window_dimensions();
 
-int main() { print_menu(); }
-
-void print_menu() {
-  // int row,col;
-  // getmaxyx(stdscr,row,col);
-  ITEM **my_items;  // menu items
-  int c;
-  MENU *my_menu;
-  WINDOW *my_menu_win;
-  WINDOW *my_menu_win2;
-  int n_choices, i;
-
+void terminal_start() {
   /* Initialize curses */
-  initscr();      // first routine when initializing a program
+  initscr();  // first routine when initializing a ncurses program
+  // mvprintw(LINES - 1, col/2, "Up and Down arrow keys to naviage (F2 to
+  // Exit)");
   start_color();  // makes possible to use colors in the courses windows
   curs_set(0);    // hides de cursor
   cbreak();  // terminal mode btween raw mode and cooked mode makes user input
@@ -52,9 +47,31 @@ void print_menu() {
   noecho();  // disables echoing
   // keypad(stdscr, TRUE); // enables the use of function keys, here is used for
   // each windows more ahead
+}
+
+void get_window_dimensions() { getmaxyx(stdscr, termy, termx); }
+
+void initialize_menu() {
+  /* initialize color used in menus*/
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
+}
+
+int main() { print_menu(); }
+
+void print_menu() {
+  ITEM **my_items;  // menu items
+  int c;
+  MENU *my_menu;
+  WINDOW *my_menu_win;
+  WINDOW *my_menu_win2;
+  int n_choices, i;
+
+  terminal_start();
+  get_window_dimensions();
+
+  initialize_menu();
 
   /* Initialize items */
   n_choices = ARRAY_SIZE(choices);
@@ -76,8 +93,8 @@ void print_menu() {
   set_menu_grey(my_menu, COLOR_PAIR(3));
 
   /* Create the window to be associated with the menu */
-  my_menu_win = newwin(10, 40, 4, 4);
-  my_menu_win2 = newwin(3, 40, 28, 8);
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
   keypad(my_menu_win, TRUE);  // enables the use of function keys
   // keypad(my_menu_win2, TRUE);
 
