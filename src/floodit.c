@@ -15,6 +15,11 @@
 #define CTRLD 4
 
 int termx, termy;
+WINDOW *my_menu_win, *my_menu_win2;
+ITEM **my_items;  // menu items
+MENU *my_menu;
+int c;
+int n_choices, i;
 
 char *choices[] = {
     "Play",
@@ -26,6 +31,7 @@ char *choices[] = {
     (char *)NULL,
 };
 void terminal_start();
+void terminal_stop();
 void print_menu();
 void print_footer();
 void print_in_middle(WINDOW *win, int starty, int startx, int width,
@@ -34,6 +40,8 @@ void play_game();
 void ga_play();
 void initialize_menu();
 void get_window_dimensions();
+void resizehandler(int);
+void control_menu();
 
 void terminal_start() {
   /* Initialize curses */
@@ -45,9 +53,12 @@ void terminal_start() {
   cbreak();  // terminal mode btween raw mode and cooked mode makes user input
              // imediately available
   noecho();  // disables echoing
-  // keypad(stdscr, TRUE); // enables the use of function keys, here is used for
+  keypad(stdscr, TRUE);  // enables the use of function keys, here is used for
   // each windows more ahead
+  refresh();
 }
+
+void terminal_stop() { endwin(); }
 
 void get_window_dimensions() { getmaxyx(stdscr, termy, termx); }
 
@@ -56,22 +67,6 @@ void initialize_menu() {
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
-}
-
-int main() { print_menu(); }
-
-void print_menu() {
-  ITEM **my_items;  // menu items
-  int c;
-  MENU *my_menu;
-  WINDOW *my_menu_win;
-  WINDOW *my_menu_win2;
-  int n_choices, i;
-
-  terminal_start();
-  get_window_dimensions();
-
-  initialize_menu();
 
   /* Initialize items */
   n_choices = ARRAY_SIZE(choices);
@@ -91,36 +86,10 @@ void print_menu() {
   set_menu_fore(my_menu, COLOR_PAIR(1) | A_REVERSE);
   set_menu_back(my_menu, COLOR_PAIR(2));
   set_menu_grey(my_menu, COLOR_PAIR(3));
-
-  /* Create the window to be associated with the menu */
-  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
-  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
-  keypad(my_menu_win, TRUE);  // enables the use of function keys
-  // keypad(my_menu_win2, TRUE);
-
-  /* Set main window and sub window */
-  set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
-
-  /* Set menu mark to the string " * " */
   set_menu_mark(my_menu, " * ");
+}
 
-  /* Print a border around the main window and print a title */
-  box(my_menu_win, 0, 0);
-  box(my_menu_win2, 0, 0);
-  print_in_middle(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
-  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
-  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-  refresh();
-
-  /* Post the menu */
-  print_footer();
-  post_menu(my_menu);
-  wrefresh(my_menu_win);
-  wrefresh(my_menu_win2);
-  refresh();
-
+void control_menu() {
   while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
     switch (c) {
       case KEY_DOWN:
@@ -156,9 +125,8 @@ void print_menu() {
         }
     }
     /*Reprinting some items*/
-    mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
-    mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F2 to Exit)");
-    box(my_menu_win, 0, 0);
+    print_footer();
+    // box(my_menu_win, 0, 0);
     box(my_menu_win2, 0, 0);
     mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
     mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
@@ -167,6 +135,80 @@ void print_menu() {
     wrefresh(my_menu_win);
     wrefresh(my_menu_win2);
   }
+}
+
+void resizehandler(int sig) {
+  terminal_stop();
+  terminal_start();
+  clear();
+
+  get_window_dimensions();
+  initialize_menu();
+  // werase(my_menu_win2);
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  mvwin(my_menu_win2, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_in_middle(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+  refresh();
+
+  print_footer();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+  refresh();
+
+  // draw_window(mapwin, mapwiny, mapwinx, ' ');
+  // draw_window(sidebar, sidebary, sidebarx, 's');
+}
+
+int main() { print_menu(); }
+
+void print_menu() {
+  terminal_start();
+  get_window_dimensions();
+  initialize_menu();
+
+  signal(SIGWINCH, resizehandler);
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_in_middle(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+  refresh();
+
+  /* Post the menu */
+  print_footer();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+  refresh();
+
+  control_menu();
 
   /* Unpost and free all the memory taken up */
   unpost_menu(my_menu);
@@ -196,8 +238,8 @@ void print_in_middle(WINDOW *win, int starty, int startx, int width,
 }
 
 void print_footer() {
-  mvprintw(LINES - 3, 0, "Press <ENTER> to see the option selected");
-  mvprintw(LINES - 2, 0, "Up and Down arrow keys to naviage (F2 to Exit)");
+  mvprintw(LINES - 3, (termx / 2) - 20, "Press <ENTER> to see the option selected");
+  mvprintw(LINES - 2, (termx / 2) - 20, "Up and Down arrow keys to naviage (F2 to Exit)");
 }
 
 void play_game() {
