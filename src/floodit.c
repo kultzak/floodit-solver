@@ -32,16 +32,16 @@ char *choices[] = {
 };
 void terminal_start();
 void terminal_stop();
+void initialize_menu();
 void print_menu();
 void print_footer();
-void print_in_middle(WINDOW *win, int starty, int startx, int width,
+void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
+void control_menu();
 void play_game();
 void ga_play();
-void initialize_menu();
 void get_window_dimensions();
 void resizehandler(int);
-void control_menu();
 
 void terminal_start() {
   /* Initialize curses */
@@ -86,7 +86,7 @@ void initialize_menu() {
   set_menu_fore(my_menu, COLOR_PAIR(1) | A_REVERSE);
   set_menu_back(my_menu, COLOR_PAIR(2));
   set_menu_grey(my_menu, COLOR_PAIR(3));
-  set_menu_mark(my_menu, " * ");
+  set_menu_mark(my_menu, " > ");
 }
 
 void control_menu() {
@@ -107,7 +107,7 @@ void control_menu() {
           case 0:
             werase(my_menu_win2);  // clear windoow2 output before going to play
             refresh();
-            endwin();
+            terminal_stop();
 
             play_game();
 
@@ -115,7 +115,7 @@ void control_menu() {
           case 2:
             werase(my_menu_win2);  // clear windoow2 output before going to play
             refresh();
-            endwin();
+            terminal_stop();
 
             ga_play();
 
@@ -130,10 +130,10 @@ void control_menu() {
     box(my_menu_win2, 0, 0);
     mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
     mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-    refresh();
-    pos_menu_cursor(my_menu);
+    // pos_menu_cursor(my_menu);
     wrefresh(my_menu_win);
     wrefresh(my_menu_win2);
+    refresh();
   }
 }
 
@@ -143,11 +143,13 @@ void resizehandler(int sig) {
   clear();
 
   get_window_dimensions();
-  initialize_menu();
-  // werase(my_menu_win2);
 
   /* Create the window to be associated with the menu */
-  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  /* recreating the window  clears the current menu state however avoid bug when
+  resizing terminal to an area smaller than the menu */
+  // my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  // my_menu_win2 = newwin(3, 40, 15, (termx / 2)- 20);
+  mvwin(my_menu_win, 4, (termx / 2) - 20);
   mvwin(my_menu_win2, 15, (termx / 2) - 20);
   keypad(my_menu_win, TRUE);  // enables the use of function keys
 
@@ -158,20 +160,16 @@ void resizehandler(int sig) {
   /* Print a border around the main window and print a title */
   box(my_menu_win, 0, 0);
   box(my_menu_win2, 0, 0);
-  print_in_middle(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
   mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
   mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-  refresh();
 
   print_footer();
   post_menu(my_menu);
   wrefresh(my_menu_win);
   wrefresh(my_menu_win2);
   refresh();
-
-  // draw_window(mapwin, mapwiny, mapwinx, ' ');
-  // draw_window(sidebar, sidebary, sidebarx, 's');
 }
 
 int main() { print_menu(); }
@@ -195,11 +193,10 @@ void print_menu() {
   /* Print a border around the main window and print a title */
   box(my_menu_win, 0, 0);
   box(my_menu_win2, 0, 0);
-  print_in_middle(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
   mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
   mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-  refresh();
 
   /* Post the menu */
   print_footer();
@@ -217,7 +214,7 @@ void print_menu() {
   endwin();
 }
 
-void print_in_middle(WINDOW *win, int starty, int startx, int width,
+void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color) {
   int length, x, y;
   float temp;
@@ -238,8 +235,10 @@ void print_in_middle(WINDOW *win, int starty, int startx, int width,
 }
 
 void print_footer() {
-  mvprintw(LINES - 3, (termx / 2) - 20, "Press <ENTER> to see the option selected");
-  mvprintw(LINES - 2, (termx / 2) - 20, "Up and Down arrow keys to naviage (F2 to Exit)");
+  mvprintw(LINES - 3, (termx / 2) - 20,
+           "Press <ENTER> to see the option selected");
+  mvprintw(LINES - 2, (termx / 2) - 20,
+           "Up and Down arrow keys to navigate (F2 to Exit)");
 }
 
 void play_game() {
