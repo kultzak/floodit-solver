@@ -20,3 +20,9 @@ $ ./floodit
 ```
 
 [Genetic Algorithm](src/readme_ga.txt)
+
+//TODO: give option to save map and result to file
+//TODO: option to load map from file
+//TODO: print move sequence as you play 
+
+

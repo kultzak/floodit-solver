@@ -46,12 +46,12 @@ void resizehandler(int);
 void terminal_start() {
   /* Initialize curses */
   initscr();  // first routine when initializing a ncurses program
-  // mvprintw(LINES - 1, col/2, "Up and Down arrow keys to naviage (F2 to
+  // mvprintw(LINES - 1, col/2, "Up and Down arrow keys to navigate (F2 to
   // Exit)");
   start_color();  // makes possible to use colors in the courses windows
   curs_set(0);    // hides de cursor
-  cbreak();  // terminal mode btween raw mode and cooked mode makes user input
-             // imediately available
+  cbreak();  // terminal mode between raw mode and cooked mode makes user input
+             // immediately available
   noecho();  // disables echoing
   keypad(stdscr, TRUE);  // enables the use of function keys, here is used for
   // each windows more ahead
@@ -144,7 +144,8 @@ void resizehandler(int sig) {
 
   get_window_dimensions();
 
-  /* Create the window to be associated with the menu */
+  //FIXME: create a routine to resize terminal to an area smaller than menu size
+  /* Create the window to be associated with the menu or move the existent according to desired strategy*/
   /* recreating the window  clears the current menu state however avoid bug when
   resizing terminal to an area smaller than the menu */
   // my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
@@ -179,7 +180,8 @@ void print_menu() {
   get_window_dimensions();
   initialize_menu();
 
-  signal(SIGWINCH, resizehandler);
+ //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
 
   /* Create the window to be associated with the menu */
   my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
@@ -205,6 +207,7 @@ void print_menu() {
   wrefresh(my_menu_win2);
   refresh();
 
+  //lasso that controls every menu operation event
   control_menu();
 
   /* Unpost and free all the memory taken up */
@@ -245,14 +248,8 @@ void play_game() {
   int cor;
   tmapa m;
   int semente;
-  // WINDOW *my_menu_win3;
 
   printf("\033c");
-
-  // my_menu_win3 = newwin(10, 40, 4, 4);
-  // box(my_menu_win3, 0, 0);
-  // wrefresh(my_menu_win3);
-  // refresh();
 
   printf("enter the number of lines: ");
   scanf("%i", &m.nlinhas);
@@ -263,26 +260,46 @@ void play_game() {
   printf("enter the number of colors: ");
   scanf("%i", &m.ncores);
 
-  // if (argc == 5)
-  // 	semente = atoi(argv[4]);
-  // else
   semente = 0;
   gera_mapa(&m, semente);
 
   cor = m.mapa[0][0];
 
+  //TODO: store previous moves into array of variable size and show them
+  // int mark[] = {19, 10, 8, 17, 9};
+
+  int *ptro=NULL;
+  int i,len=2;
+
+  //allocates initially 
+  ptro=(int*)malloc(len*sizeof(int));
+
+  int array_pos = 0;
   while (cor != -1) {
     printf("\033c");
 
     printf("type -1 to exit\n\n");
+    int loop;
 
+    printf("Previous Moves: ");
+    for(loop = 0; loop < array_pos; loop++)
+      printf("%d ", ptro[loop]);
+
+    printf("\n");
+
+    //TODO: treatment to avoid unavailable colors
     pinta_mapa(&m, cor);
     mostra_mapa_cor(&m);
+    printf("COR: ");
     scanf("%d", &cor);
+
+    array_pos++;
+    ptro = realloc(ptro, array_pos * sizeof(int));
+    ptro[array_pos-1] = cor;
   }
   system("clear");
+  free(ptro);
 
-  // return 0;
 }
 
 void ga_play() {

@@ -267,7 +267,7 @@ tplano genetic_algorithm(tmapa mo) {
 	mprob = 0;
 	generation = 0;
 
-//-----------------------//ALGUNS PARÂMETOR DE AJUSTE//-----------------------//
+//-----------------------//ALGUNS PARÂMETROS DE AJUSTE//-----------------------//
 	k = 16; // ponderação na probabilidade
 	d = 500; //escala da probabilidade
 	lambda = 0.1; //diversificador de filhos
