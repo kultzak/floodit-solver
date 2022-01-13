@@ -103,7 +103,7 @@ void mostra_fronteira(tfronteira *f) {
 
   for (i = 0; i < f->tamanho; i++)
     printf("(%d,%d):%d ", f->pos[i].l, f->pos[i].c, f->pos[i].v);
-  printf("\n%d\n", f->tamanho);
+  printf("\nFRONTEIRA: %d\n", f->tamanho);
 }
 
 int compara_pos(int l1, int c1, int l2, int c2) {
@@ -213,6 +213,34 @@ void mostra_mapa(tmapa *m) {
         printf("%d ", m->mapa[i][j]);
     printf("\n");
   }
+}
+
+void salva_mapa(tmapa *m){
+    int i, j;
+    char saving;
+    //the space before %c clear a blank character left in a previous scanf. https://stackoverflow.com/questions/18372421/scanf-is-not-waiting-for-user-input
+    printf("Do you want to save this map?[y/n]");
+    scanf(" %c", &saving);
+    printf("%c",saving);
+
+    FILE *fp;
+    // the array is cast as a const char*.
+    char result[100];   
+    strcpy(result,"Output"); // copy string one into the result.
+    strcat(result,"3"); // append string two to the result.
+    strcat(result,".txt"); // append string two to the result.
+    fp = fopen(result, "w");
+    fprintf(fp,"%d %d %d\n", m->nlinhas, m->ncolunas, m->ncores);
+    for (i = 0; i < m->nlinhas; i++) {
+      for (j = 0; j < m->ncolunas; j++)
+        if (m->ncores > 10)
+          fprintf(fp,"%02d ", m->mapa[i][j]);
+        else
+          fprintf(fp,"%d ", m->mapa[i][j]);
+      fprintf(fp,"\n");
+    }
+    fclose(fp); //Don't forget to close the file when finished
+    printf("O mapa foi salvo como: XXXXXX.fldmap\n");
 }
 
 void mostra_mapa_cor(tmapa *m) {

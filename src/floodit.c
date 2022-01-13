@@ -257,19 +257,24 @@ void play_game() {
   printf("enter the number of columns: ");
   scanf("%i", &m.ncolunas);
 
+  //this scanf lets a trailing line break
   printf("enter the number of colors: ");
   scanf("%i", &m.ncores);
 
   semente = 0;
   gera_mapa(&m, semente);
 
+  mostra_mapa_cor(&m);
+  salva_mapa(&m);
+
   cor = m.mapa[0][0];
+  scanf("%d", &cor);
 
   //TODO: store previous moves into array of variable size and show them
   // int mark[] = {19, 10, 8, 17, 9};
 
   int *ptro=NULL;
-  int i,len=2;
+  int len=2;
 
   //allocates initially 
   ptro=(int*)malloc(len*sizeof(int));
@@ -287,15 +292,21 @@ void play_game() {
 
     printf("\n");
 
-    //TODO: treatment to avoid unavailable colors
+    //TODO: treatment to avoid unavailable color printing
     pinta_mapa(&m, cor);
     mostra_mapa_cor(&m);
     printf("COR: ");
     scanf("%d", &cor);
 
-    array_pos++;
-    ptro = realloc(ptro, array_pos * sizeof(int));
-    ptro[array_pos-1] = cor;
+    //print moves until map is flooded
+    tfronteira *f;
+    f = aloca_fronteira(&m);
+    fronteira_mapa(&m, f);
+    if(f->tamanho){
+      array_pos++;
+      ptro = realloc(ptro, array_pos * sizeof(int));
+      ptro[array_pos-1] = cor;
+    }
   }
   system("clear");
   free(ptro);
