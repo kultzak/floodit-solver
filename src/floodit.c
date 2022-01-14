@@ -266,9 +266,10 @@ void play_game() {
 
   mostra_mapa_cor(&m);
   salva_mapa(&m);
+  getchar(); //just to wait showing the save path
+
 
   cor = m.mapa[0][0];
-  scanf("%d", &cor);
 
   //TODO: store previous moves into array of variable size and show them
   // int mark[] = {19, 10, 8, 17, 9};
