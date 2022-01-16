@@ -234,9 +234,17 @@ void salva_mapa(tmapa *m){
       FILE *fp;
       // the array is cast as a const char*.
       char result[100];   
-      strcpy(result,"Output"); // copy string one into the result.
-      strcat(result,"3"); // append string two to the result.
-      strcat(result,".txt"); // append string two to the result.
+      char buffer[128];
+      strcpy(result,"Output_"); // copy string one into the result.
+      sprintf(buffer, "%d", m->nlinhas);
+      strcat(result,buffer); // append string two to the result.
+      strcat(result,"_"); 
+      sprintf(buffer, "%d", m->ncolunas);
+      strcat(result,buffer); // append string two to the result.
+      strcat(result,"_"); 
+      sprintf(buffer, "%d", m->ncores);
+      strcat(result,buffer); // append string two to the result.
+      strcat(result,".txt"); 
       fp = fopen(result, "w");
       fprintf(fp,"%d %d %d\n", m->nlinhas, m->ncolunas, m->ncores);
       for (i = 0; i < m->nlinhas; i++) {
@@ -248,7 +256,8 @@ void salva_mapa(tmapa *m){
         fprintf(fp,"\n");
       }
       fclose(fp); //Don't forget to close the file when finished
-      printf("O mapa foi salvo como: XXXXXX.fldmap\n");
+      printf("O mapa foi salvo como: %d_%d_%d.fldmap\n",m->nlinhas,m->ncolunas,m->ncores);
+      printf("Type anything to continue to game.");
     }
     getchar(); //just to wait showing the save path
 }
