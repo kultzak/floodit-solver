@@ -244,6 +244,8 @@ void print_footer() {
            "Up and Down arrow keys to navigate (F2 to Exit)");
 }
 
+//TODO: give option to save map and result to file
+//TODO: option to load map from file
 void play_game() {
   int cor;
   tmapa m;
@@ -307,6 +309,11 @@ void play_game() {
       array_pos++;
       ptro = realloc(ptro, array_pos * sizeof(int));
       ptro[array_pos-1] = cor;
+    }else{
+    //TODO: a way to show this as soon as the map is flooded
+    salva_plano();
+    getchar();
+    cor = -1;
     }
   }
   system("clear");

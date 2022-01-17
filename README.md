@@ -6,22 +6,22 @@ of colors >= 3.
 [The Complexity of Flood Filling Games.](https://arxiv.org/pdf/1001.4420.pdf)
 
 
-# floodit-solver
-genetic algorithm to solve a floodit game
-
-![](/src/images/solving.gif)
-
-...currently implementing game interface and other solving algorithms.
-
+# how to run
 from src directory run
 ```
 $ make
 $ ./floodit
 ```
 
-[Genetic Algorithm](src/readme_ga.txt)
 
-//TODO: give option to save map and result to file
-//TODO: option to load map from file
+# about floodit-solver
+genetic algorithm to solve a floodit game
+
+...currently implementing game interface and other solving algorithms.
+
+![](/src/images/solving.gif)
+
+
+[Genetic Algorithm](src/readme_ga.txt)
 
 

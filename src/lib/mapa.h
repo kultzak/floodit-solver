@@ -49,6 +49,7 @@ void carrega_mapa(tmapa*);
 void mostra_mapa(tmapa*);
 void mostra_mapa_cor(tmapa*);
 void salva_mapa(tmapa*);
+void salva_plano();
 void pinta_mapa(tmapa*, int);
 
 void fronteira_mapa(tmapa*, tfronteira*);

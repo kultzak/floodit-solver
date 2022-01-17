@@ -256,10 +256,39 @@ void salva_mapa(tmapa *m){
         fprintf(fp,"\n");
       }
       fclose(fp); //Don't forget to close the file when finished
-      printf("O mapa foi salvo como: %d_%d_%d.fldmap\n",m->nlinhas,m->ncolunas,m->ncores);
+      printf("Map saved as: %d_%d_%d.fldmap\n",m->nlinhas,m->ncolunas,m->ncores);
       printf("Type anything to continue to game.");
+      getchar(); //just to wait showing the save path
     }
-    getchar(); //just to wait showing the save path
+}
+
+void salva_plano(){
+    char r;
+    //the space before %c clear a blank character left in a previous scanf. https://stackoverflow.com/questions/18372421/scanf-is-not-waiting-for-user-input
+    printf("Do you want to save this solution for this map?[y/n]");
+
+    r = getchar();
+    if (r == '\n') r = getchar();
+    while (r != 'n' && r != 'N' && r != 'y' && r != 'Y')
+    {
+      printf("invalid input, enter the choice again (y/Y/n/N): ");
+      r = getchar();
+      if (r == '\n') r = getchar();
+    }
+    if (r == 'y' || r == 'Y')
+    {
+      FILE *fp;
+      // the array is cast as a const char*.
+      char result[100];   
+      strcpy(result,"Solution_"); // copy string one into the result.
+      strcat(result,".txt"); 
+      fp = fopen(result, "w");
+      fprintf(fp,"Solução\n");
+      fclose(fp); //Don't forget to close the file when finished
+      printf("The solution was saved as: Solution_.fldplan\n");
+      printf("Type anything to continue to go back to main menu.");
+      getchar(); //just to wait showing while the plan path 
+    }
 }
 
 void mostra_mapa_cor(tmapa *m) {
