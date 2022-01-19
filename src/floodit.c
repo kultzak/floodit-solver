@@ -309,11 +309,30 @@ void play_game() {
       array_pos++;
       ptro = realloc(ptro, array_pos * sizeof(int));
       ptro[array_pos-1] = cor;
-    }else{
-    //TODO: a way to show this as soon as the map is flooded
-    salva_plano();
-    getchar();
-    cor = -1;
+    }
+
+    //get if is the last move
+    pinta_mapa(&m, cor);
+    f = aloca_fronteira(&m);
+    fronteira_mapa(&m, f);
+    if(f->tamanho==0){
+        printf("\033c");
+
+        printf("type -1 to exit\n\n");
+        int loop;
+
+        printf("Previous Moves: ");
+        for(loop = 0; loop < array_pos; loop++)
+          printf("%d ", ptro[loop]);
+
+        printf("\n");
+
+        pinta_mapa(&m, cor);
+        mostra_mapa_cor(&m);
+        printf("COR: ");
+        salva_plano();
+        getchar();
+        cor = -1;
     }
   }
   system("clear");

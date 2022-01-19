@@ -286,7 +286,7 @@ void salva_plano(){
       fprintf(fp,"Solução\n");
       fclose(fp); //Don't forget to close the file when finished
       printf("The solution was saved as: Solution_.fldplan\n");
-      printf("Type anything to continue to go back to main menu.");
+      printf("Type anything to go back to main menu.");
       getchar(); //just to wait showing while the plan path 
     }
 }
