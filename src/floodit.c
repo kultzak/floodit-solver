@@ -30,14 +30,23 @@ char *choices[] = {
     "Exit",
     (char *)NULL,
 };
+char *choices2[] = {
+    "Generate new map",
+    "Load map",
+    "Back",
+    (char *)NULL,
+};
 void terminal_start();
 void terminal_stop();
 void initialize_menu();
-void print_menu();
+void initialize_menu2();
+void print_main_menu();
+void print_play_menu();
 void print_footer();
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
-void control_menu();
+void control_main_menu();
+void control_play_menu();
 void play_game();
 void ga_play();
 void get_window_dimensions();
@@ -89,7 +98,82 @@ void initialize_menu() {
   set_menu_mark(my_menu, " > ");
 }
 
-void control_menu() {
+void initialize_menu2() {
+  /* initialize color used in menus*/
+  init_pair(1, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
+
+  /* Initialize items */
+  n_choices = ARRAY_SIZE(choices2);
+  my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(choices2[i], "");
+  my_items[n_choices] = (ITEM *)NULL;
+  item_opts_off(my_items[1],
+                O_SELECTABLE);  // turns off the named options for item; no
+                                // other option is changed.
+  // item_opts_off(my_items[2], O_SELECTABLE);
+  // item_opts_off(my_items[3], O_SELECTABLE);
+
+  /* Crate menu */
+  my_menu = new_menu((ITEM **)my_items);
+
+  /* Set fore ground and back ground of the menu */
+  set_menu_fore(my_menu, COLOR_PAIR(1) | A_REVERSE);
+  set_menu_back(my_menu, COLOR_PAIR(2));
+  set_menu_grey(my_menu, COLOR_PAIR(3));
+  set_menu_mark(my_menu, " + ");
+}
+
+void control_main_menu() {
+  while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
+    switch (c) {
+      case KEY_DOWN:
+        menu_driver(my_menu, REQ_DOWN_ITEM);
+        break;
+      case KEY_UP:
+        menu_driver(my_menu, REQ_UP_ITEM);
+        break;
+      case 10: /* Enter */
+        wmove(my_menu_win2, 1, 1);
+        wclrtoeol(my_menu_win2);
+        mvwprintw(my_menu_win2, 1, 1, "%s is disabled",
+                  item_name(current_item(my_menu)));
+        switch (item_index(current_item(my_menu))) {
+          case 0:
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            print_play_menu();
+
+            break;
+          case 2:
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            ga_play();
+
+            break;
+          default:
+            break;
+        }
+    }
+    /*Reprinting some items*/
+    print_footer();
+    // box(my_menu_win, 0, 0);
+    box(my_menu_win2, 0, 0);
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+    // pos_menu_cursor(my_menu);
+    wrefresh(my_menu_win);
+    wrefresh(my_menu_win2);
+    refresh();
+  }
+}
+
+void control_play_menu() {
   while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
     switch (c) {
       case KEY_DOWN:
@@ -110,6 +194,7 @@ void control_menu() {
             terminal_stop();
 
             play_game();
+            print_main_menu();
 
             break;
           case 2:
@@ -117,7 +202,8 @@ void control_menu() {
             refresh();
             terminal_stop();
 
-            ga_play();
+            system("clear");
+            print_main_menu();
 
             break;
           default:
@@ -173,9 +259,9 @@ void resizehandler(int sig) {
   refresh();
 }
 
-int main() { print_menu(); }
+int main() { print_main_menu(); }
 
-void print_menu() {
+void print_main_menu() {
   terminal_start();
   get_window_dimensions();
   initialize_menu();
@@ -208,7 +294,49 @@ void print_menu() {
   refresh();
 
   //lasso that controls every menu operation event
-  control_menu();
+  control_main_menu();
+
+  /* Unpost and free all the memory taken up */
+  unpost_menu(my_menu);
+  for (i = 0; i < n_choices; ++i) free_item(my_items[i]);
+  free_menu(my_menu);
+  endwin();
+}
+
+void print_play_menu() {
+  // terminal_start();
+  get_window_dimensions();
+  initialize_menu2();
+
+ //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-itão", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+
+  /* Post the menu */
+  print_footer();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+  refresh();
+
+  //lasso that controls every menu operation event
+  control_play_menu();
 
   /* Unpost and free all the memory taken up */
   unpost_menu(my_menu);
