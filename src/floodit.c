@@ -21,7 +21,7 @@ MENU *my_menu;
 int c;
 int n_choices, i;
 
-char *choices[] = {
+char *main_menu_choices[] = {
     "Play",
     "How to Play",
     "Peep how GA play",
@@ -30,7 +30,7 @@ char *choices[] = {
     "Exit",
     (char *)NULL,
 };
-char *choices2[] = {
+char *play_menu_choices[] = {
     "Generate new map",
     "Load map",
     "Back",
@@ -48,6 +48,7 @@ void print_menu_title(WINDOW *win, int starty, int startx, int width,
 void control_main_menu();
 void control_play_menu();
 void play_game();
+void config_n_generate_map();
 void ga_play();
 void get_window_dimensions();
 void resizehandler(int);
@@ -78,9 +79,9 @@ void initialize_menu() {
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
 
   /* Initialize items */
-  n_choices = ARRAY_SIZE(choices);
+  n_choices = ARRAY_SIZE(main_menu_choices);
   my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
-  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(choices[i], "");
+  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(main_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
   item_opts_off(my_items[1],
                 O_SELECTABLE);  // turns off the named options for item; no
@@ -105,13 +106,11 @@ void initialize_menu2() {
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
 
   /* Initialize items */
-  n_choices = ARRAY_SIZE(choices2);
+  n_choices = ARRAY_SIZE(play_menu_choices);
   my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
-  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(choices2[i], "");
+  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(play_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
-  item_opts_off(my_items[1],
-                O_SELECTABLE);  // turns off the named options for item; no
-                                // other option is changed.
+  // item_opts_off(my_items[1], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
   // item_opts_off(my_items[2], O_SELECTABLE);
   // item_opts_off(my_items[3], O_SELECTABLE);
 
@@ -188,16 +187,26 @@ void control_play_menu() {
         mvwprintw(my_menu_win2, 1, 1, "%s is disabled",
                   item_name(current_item(my_menu)));
         switch (item_index(current_item(my_menu))) {
-          case 0:
+          case 0: //new map
             werase(my_menu_win2);  // clear windoow2 output before going to play
             refresh();
             terminal_stop();
 
-            play_game();
+            config_n_generate_map();
             print_main_menu();
 
             break;
-          case 2:
+          case 1: //load map
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            //TODO: separate the action of game playing from loading map or creating map
+            config_n_generate_map();
+            print_main_menu();
+
+            break;
+          case 2: //back
             werase(my_menu_win2);  // clear windoow2 output before going to play
             refresh();
             terminal_stop();
@@ -374,32 +383,17 @@ void print_footer() {
 
 //TODO: give option to save map and result to file
 //TODO: option to load map from file
-void play_game() {
+void play_game(tmapa *m) {
   int cor;
-  tmapa m;
-  int semente;
 
   printf("\033c");
 
-  printf("enter the number of lines: ");
-  scanf("%i", &m.nlinhas);
-
-  printf("enter the number of columns: ");
-  scanf("%i", &m.ncolunas);
-
-  //this scanf lets a trailing line break
-  printf("enter the number of colors: ");
-  scanf("%i", &m.ncores);
-
-  semente = 0;
-  gera_mapa(&m, semente);
-
-  mostra_mapa_cor(&m);
-  salva_mapa(&m);
+  mostra_mapa_cor(m);
+  salva_mapa(m);
   getchar(); //just to wait showing the save path
 
 
-  cor = m.mapa[0][0];
+  cor = m->mapa[0][0];
 
   //TODO: store previous moves into array of variable size and show them
   // int mark[] = {19, 10, 8, 17, 9};
@@ -424,15 +418,15 @@ void play_game() {
     printf("\n");
 
     //TODO: treatment to avoid unavailable color printing
-    pinta_mapa(&m, cor);
-    mostra_mapa_cor(&m);
+    pinta_mapa(m, cor);
+    mostra_mapa_cor(m);
     printf("COR: ");
     scanf("%d", &cor);
 
     //print moves until map is flooded
     tfronteira *f;
-    f = aloca_fronteira(&m);
-    fronteira_mapa(&m, f);
+    f = aloca_fronteira(m);
+    fronteira_mapa(m, f);
     if(f->tamanho){
       array_pos++;
       ptro = realloc(ptro, array_pos * sizeof(int));
@@ -440,9 +434,9 @@ void play_game() {
     }
 
     //get if is the last move
-    pinta_mapa(&m, cor);
-    f = aloca_fronteira(&m);
-    fronteira_mapa(&m, f);
+    pinta_mapa(m, cor);
+    f = aloca_fronteira(m);
+    fronteira_mapa(m, f);
     if(f->tamanho==0){
         printf("\033c");
 
@@ -455,8 +449,8 @@ void play_game() {
 
         printf("\n");
 
-        pinta_mapa(&m, cor);
-        mostra_mapa_cor(&m);
+        pinta_mapa(m, cor);
+        mostra_mapa_cor(m);
         printf("COR: ");
         salva_plano();
         getchar();
@@ -466,6 +460,26 @@ void play_game() {
   system("clear");
   free(ptro);
 
+}
+
+void config_n_generate_map(){
+  int semente;
+  tmapa m;
+  printf("\033c");
+
+  printf("enter the number of lines: ");
+  scanf("%i", &m.nlinhas);
+
+  printf("enter the number of columns: ");
+  scanf("%i", &m.ncolunas);
+
+  //this scanf lets a trailing line break
+  printf("enter the number of colors: ");
+  scanf("%i", &m.ncores);
+
+  semente = 0;
+  gera_mapa(&m, semente);
+  play_game(&m);
 }
 
 void ga_play() {
