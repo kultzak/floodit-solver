@@ -49,6 +49,7 @@ void control_main_menu();
 void control_play_menu();
 void play_game();
 void config_n_generate_map();
+void load_map_n_play();
 void ga_play();
 void get_window_dimensions();
 void resizehandler(int);
@@ -202,7 +203,7 @@ void control_play_menu() {
             terminal_stop();
 
             //TODO: separate the action of game playing from loading map or creating map
-            config_n_generate_map();
+            load_map_n_play();
             print_main_menu();
 
             break;
@@ -479,6 +480,17 @@ void config_n_generate_map(){
 
   semente = 0;
   gera_mapa(&m, semente);
+  play_game(&m);
+}
+
+void load_map_n_play(){
+  tmapa m;
+  printf("\033c");
+
+  printf("Insert the map!");
+
+  carrega_mapa(&m);
+
   play_game(&m);
 }
 
