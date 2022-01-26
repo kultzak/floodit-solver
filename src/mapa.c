@@ -244,7 +244,7 @@ void salva_mapa(tmapa *m){
       strcat(result,"_"); 
       sprintf(buffer, "%d", m->ncores);
       strcat(result,buffer); // append string two to the result.
-      strcat(result,".txt"); 
+      strcat(result,".fldmap"); 
       fp = fopen(result, "w");
       fprintf(fp,"%d %d %d\n", m->nlinhas, m->ncolunas, m->ncores);
       for (i = 0; i < m->nlinhas; i++) {
