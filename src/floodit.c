@@ -37,6 +37,22 @@ char *play_menu_choices[] = {
     "Back",
     (char *)NULL,
 };
+
+char *choices[] = {
+      "Choice 1",
+      "Choice 2",
+      "Choice 3",
+      "Choice 4",
+			"Choice 5",
+			"Choice 6",
+			"Choice 7",
+			"Choice 8",
+			"Choice 9",
+			"Choice 10",
+      "Exit",
+      (char *)NULL,
+};
+
 void terminal_start();
 void terminal_stop();
 void initialize_menu();
@@ -127,6 +143,7 @@ void initialize_menu2() {
 }
 
 void control_main_menu() {
+ //FIXME: it crashes if hit f2 after comming back from inside other menu or game
   while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
     switch (c) {
       case KEY_DOWN:
@@ -484,50 +501,120 @@ void config_n_generate_map(){
   play_game(&m);
 }
 
-/* when return 1, scandir will put this dirent to the list */
-   static int parse_ext(const struct dirent *dir)
-   {
-     if(!dir)
-       return 0;
+// /* when return 1, scandir will put this dirent to the list */
+// static int parse_ext(const struct dirent *dir)
+// {
+//   if(!dir)
+//     return 0;
 
-     if(dir->d_type == DT_REG) { /* only deal with regular file */
-         const char *ext = strrchr(dir->d_name,'.');
-         if((!ext) || (ext == dir->d_name))
-           return 0;
-         else {
-           if(strcmp(ext, ".fldmap") == 0)
-             return 1;
-         }
-     }
+//   if(dir->d_type == DT_REG) { /* only deal with regular file */
+//       const char *ext = strrchr(dir->d_name,'.');
+//       if((!ext) || (ext == dir->d_name))
+//         return 0;
+//       else {
+//         if(strcmp(ext, ".fldmap") == 0)
+//           return 1;
+//       }
+//   }
 
-     return 0;
-   }
+//   return 0;
+// }
 
 void load_map_n_play(){
-  tmapa m;
   printf("\033c");
 
-  printf("Select the map!\n\n");
+	int c;				
+  int n_choices, i;
+	
+	/* Create items */
+  n_choices = ARRAY_SIZE(choices);
+  my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  for(i = 0; i < n_choices; ++i)
+          my_items[i] = new_item(choices[i],"");
 
-  struct dirent **namelist;
-  int n;
+	/* Crate menu */
+	my_menu = new_menu((ITEM **)my_items);
 
-  n = scandir(".", &namelist, parse_ext, alphasort);
-  if (n < 0) {
-      perror("scandir");
-  }
-  else {
-      while (n--) {
-          printf("%s\n", namelist[n]->d_name);
-          free(namelist[n]);
-      }
-      free(namelist);
-  }
+	/* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+     
+	/* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1));
+	set_menu_format(my_menu, 5, 1);
+			
+	/* Set menu mark to the string " * " */
+        set_menu_mark(my_menu, " * ");
+
+	/* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+	print_menu_title(my_menu_win, 1, 0, 40, "Select the map!", COLOR_PAIR(1));
+	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+        
+	/* Post the menu */
+	attron(COLOR_PAIR(2));
+  print_footer();
+	mvprintw(LINES - 1, 0, "Use PageUp and PageDown to scoll down or up a page of items");
+	attroff(COLOR_PAIR(2));
+	post_menu(my_menu);
+	wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+	refresh();
+	
+
+	while((c = wgetch(my_menu_win)) != KEY_F(2))
+	{
+      switch(c) {	
+        case KEY_DOWN:
+          menu_driver(my_menu, REQ_DOWN_ITEM);
+          break;
+        case KEY_UP:
+          menu_driver(my_menu, REQ_UP_ITEM);
+          break;
+        case KEY_NPAGE:
+          menu_driver(my_menu, REQ_SCR_DPAGE);
+          break;
+        case KEY_PPAGE:
+          menu_driver(my_menu, REQ_SCR_UPAGE);
+          break;
+		}
+                wrefresh(my_menu_win);
+	}	
+
+	/* Unpost and free all the memory taken up */
+  unpost_menu(my_menu);
+  free_menu(my_menu);
+  for(i = 0; i < n_choices; ++i)
+          free_item(my_items[i]);
+	endwin();
 
 
-  carrega_mapa(&m);
+  // tmapa m;
 
-  play_game(&m);
+  // struct dirent **namelist; //dir entry struct
+  // int n;
+
+  // n = scandir(".", &namelist, parse_ext, alphasort);
+  // if (n < 0) {
+  //     perror("scandir");
+  // }
+  // else {
+  //     while (n--) {
+  //         printf("%s\n", namelist[n]->d_name);
+  //         free(namelist[n]);
+  //     }
+  //     free(namelist);
+  // }
+
+
+  // carrega_mapa(&m);
+
+  // play_game(&m);
 }
 
    
