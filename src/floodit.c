@@ -501,37 +501,54 @@ void config_n_generate_map(){
   play_game(&m);
 }
 
-// /* when return 1, scandir will put this dirent to the list */
-// static int parse_ext(const struct dirent *dir)
-// {
-//   if(!dir)
-//     return 0;
+/* when return 1, scandir will put this dirent to the list */
+static int parse_ext(const struct dirent *dir)
+{
+  if(!dir)
+    return 0;
 
-//   if(dir->d_type == DT_REG) { /* only deal with regular file */
-//       const char *ext = strrchr(dir->d_name,'.');
-//       if((!ext) || (ext == dir->d_name))
-//         return 0;
-//       else {
-//         if(strcmp(ext, ".fldmap") == 0)
-//           return 1;
-//       }
-//   }
+  if(dir->d_type == DT_REG) { /* only deal with regular file */
+      const char *ext = strrchr(dir->d_name,'.');
+      if((!ext) || (ext == dir->d_name))
+        return 0;
+      else {
+        if(strcmp(ext, ".fldmap") == 0)
+          return 1;
+      }
+  }
 
-//   return 0;
-// }
+  return 0;
+}
 
 void load_map_n_play(){
   printf("\033c");
 
 	int c;				
   int n_choices, i;
-	
-	/* Create items */
-  n_choices = ARRAY_SIZE(choices);
-  my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
-  for(i = 0; i < n_choices; ++i)
-          my_items[i] = new_item(choices[i],"");
+  tmapa m;
 
+	struct dirent **namelist; //dir entry struct
+
+  n_choices = scandir(".", &namelist, parse_ext, alphasort);
+  if (n_choices < 0) {
+      perror("scandir");
+  }
+  // else {
+  //     while (n--) {
+  //         printf("%s\n", namelist[n]->d_name);
+  //         free(namelist[n]);
+  //     }
+  //     free(namelist);
+  // }
+  
+  /* Create items */
+  if(n_choices < 900){
+    my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  }
+  for(i = 0; i < n_choices; ++i)
+          my_items[i] = new_item(namelist[i]->d_name,"");
+  free(namelist);
+  
 	/* Crate menu */
 	my_menu = new_menu((ITEM **)my_items);
 
@@ -542,11 +559,11 @@ void load_map_n_play(){
      
 	/* Set main window and sub window */
   set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1));
-	set_menu_format(my_menu, 5, 1);
+  set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1)); //menu position inside window
+	set_menu_format(my_menu, 5, 1); //make the menu scrollable
 			
 	/* Set menu mark to the string " * " */
-        set_menu_mark(my_menu, " * ");
+  set_menu_mark(my_menu, " * ");
 
 	/* Print a border around the main window and print a title */
   box(my_menu_win, 0, 0);
@@ -582,8 +599,8 @@ void load_map_n_play(){
         case KEY_PPAGE:
           menu_driver(my_menu, REQ_SCR_UPAGE);
           break;
-		}
-                wrefresh(my_menu_win);
+		  }
+      wrefresh(my_menu_win);
 	}	
 
 	/* Unpost and free all the memory taken up */
@@ -594,27 +611,9 @@ void load_map_n_play(){
 	endwin();
 
 
-  // tmapa m;
+  carrega_mapa(&m);
 
-  // struct dirent **namelist; //dir entry struct
-  // int n;
-
-  // n = scandir(".", &namelist, parse_ext, alphasort);
-  // if (n < 0) {
-  //     perror("scandir");
-  // }
-  // else {
-  //     while (n--) {
-  //         printf("%s\n", namelist[n]->d_name);
-  //         free(namelist[n]);
-  //     }
-  //     free(namelist);
-  // }
-
-
-  // carrega_mapa(&m);
-
-  // play_game(&m);
+  play_game(&m);
 }
 
    
