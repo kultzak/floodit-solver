@@ -57,6 +57,7 @@ void terminal_start();
 void terminal_stop();
 void initialize_menu();
 void initialize_menu2();
+void initialize_menu3();
 void print_main_menu();
 void print_play_menu();
 void print_footer();
@@ -64,12 +65,14 @@ void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
 void control_main_menu();
 void control_play_menu();
+void control_mapselect_menu();
 void play_game();
 void config_n_generate_map();
 void load_map_n_play();
 void ga_play();
 void get_window_dimensions();
 void resizehandler(int);
+static int parse_ext(const struct dirent *dir);
 
 void terminal_start() {
   /* Initialize curses */
@@ -140,6 +143,47 @@ void initialize_menu2() {
   set_menu_back(my_menu, COLOR_PAIR(2));
   set_menu_grey(my_menu, COLOR_PAIR(3));
   set_menu_mark(my_menu, " + ");
+}
+
+void initialize_menu3() {
+  /* initialize color used in menus*/
+  init_pair(1, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  init_pair(3, COLOR_MAGENTA, COLOR_BLACK);	
+  int n_choices, i;
+
+	struct dirent **namelist; //dir entry struct
+
+  n_choices = scandir(".", &namelist, parse_ext, alphasort);
+  if (n_choices < 0) {
+      perror("scandir");
+  }
+  // else {
+  //     while (n--) {
+  //         printf("%s\n", namelist[n]->d_name);
+  //         free(namelist[n]);
+  //     }
+  //     free(namelist);
+  // }
+  
+  /* Create items */
+  if(n_choices < 900){ //to avoid calloc below exceeding maximum object size
+    my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  }
+  for(i = 0; i < n_choices; ++i)
+          my_items[i] = new_item(namelist[i]->d_name,"");
+  free(namelist);
+  // item_opts_off(my_items[0], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
+  // item_opts_off(my_items[2], O_SELECTABLE);
+  
+	/* Crate menu */
+	my_menu = new_menu((ITEM **)my_items);
+
+  /* Set fore ground and back ground of the menu */
+  set_menu_fore(my_menu, COLOR_PAIR(1) | A_REVERSE);
+  set_menu_back(my_menu, COLOR_PAIR(2));
+  set_menu_grey(my_menu, COLOR_PAIR(3));
+  set_menu_mark(my_menu, " * ");
 }
 
 void control_main_menu() {
@@ -249,6 +293,39 @@ void control_play_menu() {
     wrefresh(my_menu_win2);
     refresh();
   }
+}
+
+void control_mapselect_menu(){
+  while((c = wgetch(my_menu_win)) != KEY_F(2)) {
+    switch(c) {	
+      case KEY_DOWN:
+        menu_driver(my_menu, REQ_DOWN_ITEM);
+        break;
+      case KEY_UP:
+        menu_driver(my_menu, REQ_UP_ITEM);
+        break;
+      case KEY_NPAGE:
+        menu_driver(my_menu, REQ_SCR_DPAGE);
+        break;
+      case KEY_PPAGE:
+        menu_driver(my_menu, REQ_SCR_UPAGE);
+        break;
+      case 10: /* Enter */
+        wmove(my_menu_win2, 1, 1);
+        wclrtoeol(my_menu_win2);
+        mvwprintw(my_menu_win2, 1, 1, "Loading map %s", item_name(current_item(my_menu)));
+    }
+    /*Reprinting some items*/
+    print_footer();
+    // box(my_menu_win, 0, 0);
+    box(my_menu_win2, 0, 0);
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+    // pos_menu_cursor(my_menu);
+    wrefresh(my_menu_win);
+    wrefresh(my_menu_win2);
+    refresh();
+	}
 }
 
 void resizehandler(int sig) {
@@ -521,57 +598,32 @@ static int parse_ext(const struct dirent *dir)
 }
 
 void load_map_n_play(){
-  printf("\033c");
-
-	int c;				
-  int n_choices, i;
+  int n_choices;
   tmapa m;
+  printf("\033c");
+  get_window_dimensions();
+  initialize_menu3();
 
-	struct dirent **namelist; //dir entry struct
+   //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
 
-  n_choices = scandir(".", &namelist, parse_ext, alphasort);
-  if (n_choices < 0) {
-      perror("scandir");
-  }
-  // else {
-  //     while (n--) {
-  //         printf("%s\n", namelist[n]->d_name);
-  //         free(namelist[n]);
-  //     }
-  //     free(namelist);
-  // }
-  
-  /* Create items */
-  if(n_choices < 900){
-    my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
-  }
-  for(i = 0; i < n_choices; ++i)
-          my_items[i] = new_item(namelist[i]->d_name,"");
-  free(namelist);
-  
-	/* Crate menu */
-	my_menu = new_menu((ITEM **)my_items);
-
-	/* Create the window to be associated with the menu */
+  /* Create the window to be associated with the menu */
   my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
   my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
   keypad(my_menu_win, TRUE);  // enables the use of function keys
-     
+
 	/* Set main window and sub window */
   set_menu_win(my_menu, my_menu_win);
   set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1)); //menu position inside window
 	set_menu_format(my_menu, 5, 1); //make the menu scrollable
-			
-	/* Set menu mark to the string " * " */
-  set_menu_mark(my_menu, " * ");
 
-	/* Print a border around the main window and print a title */
+  /* Print a border around the main window and print a title */
   box(my_menu_win, 0, 0);
   box(my_menu_win2, 0, 0);
-	print_menu_title(my_menu_win, 1, 0, 40, "Select the map!", COLOR_PAIR(1));
-	mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-	mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
-	mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
         
 	/* Post the menu */
 	attron(COLOR_PAIR(2));
@@ -582,31 +634,14 @@ void load_map_n_play(){
 	wrefresh(my_menu_win);
   wrefresh(my_menu_win2);
 	refresh();
-	
 
-	while((c = wgetch(my_menu_win)) != KEY_F(2))
-	{
-      switch(c) {	
-        case KEY_DOWN:
-          menu_driver(my_menu, REQ_DOWN_ITEM);
-          break;
-        case KEY_UP:
-          menu_driver(my_menu, REQ_UP_ITEM);
-          break;
-        case KEY_NPAGE:
-          menu_driver(my_menu, REQ_SCR_DPAGE);
-          break;
-        case KEY_PPAGE:
-          menu_driver(my_menu, REQ_SCR_UPAGE);
-          break;
-		  }
-      wrefresh(my_menu_win);
-	}	
+  //lasso that controls every menu operation event
+  control_mapselect_menu();
 
 	/* Unpost and free all the memory taken up */
   unpost_menu(my_menu);
   free_menu(my_menu);
-  for(i = 0; i < n_choices; ++i)
+  for(i = 0; i < n_choices; ++i) //FIXME: why do I crash in this part?
           free_item(my_items[i]);
 	endwin();
 
