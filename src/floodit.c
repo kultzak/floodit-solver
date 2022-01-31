@@ -44,12 +44,6 @@ char *choices[] = {
       "Choice 3",
       "Choice 4",
 			"Choice 5",
-			"Choice 6",
-			"Choice 7",
-			"Choice 8",
-			"Choice 9",
-			"Choice 10",
-      "Exit",
       (char *)NULL,
 };
 
@@ -60,12 +54,14 @@ void initialize_menu2();
 void initialize_menu3();
 void print_main_menu();
 void print_play_menu();
+void print_loadmap_menu();
 void print_footer();
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
 void control_main_menu();
 void control_play_menu();
 void control_mapselect_menu();
+void unpost_n_free_menu();
 void play_game();
 void config_n_generate_map();
 void load_map_n_play();
@@ -150,7 +146,6 @@ void initialize_menu3() {
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);	
-  int n_choices, i;
 
 	struct dirent **namelist; //dir entry struct
 
@@ -167,11 +162,14 @@ void initialize_menu3() {
   // }
   
   /* Create items */
+  // n_choices = ARRAY_SIZE(choices);
   if(n_choices < 900){ //to avoid calloc below exceeding maximum object size
-    my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+    my_items = (ITEM **)calloc(n_choices+1, sizeof(ITEM *));
   }
   for(i = 0; i < n_choices; ++i)
           my_items[i] = new_item(namelist[i]->d_name,"");
+          // my_items[i] = new_item(choices[i],"");
+  my_items[n_choices] = (ITEM *)NULL; //for some reason this null
   free(namelist);
   // item_opts_off(my_items[0], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
   // item_opts_off(my_items[2], O_SELECTABLE);
@@ -328,6 +326,14 @@ void control_mapselect_menu(){
 	}
 }
 
+void unpost_n_free_menu(){
+  unpost_menu(my_menu);
+  free_menu(my_menu);
+  for(i = 0; i < n_choices; ++i)
+          free_item(my_items[i]);
+	endwin();
+}
+
 void resizehandler(int sig) {
   terminal_stop();
   terminal_start();
@@ -401,11 +407,8 @@ void print_main_menu() {
   //lasso that controls every menu operation event
   control_main_menu();
 
-  /* Unpost and free all the memory taken up */
-  unpost_menu(my_menu);
-  for (i = 0; i < n_choices; ++i) free_item(my_items[i]);
-  free_menu(my_menu);
-  endwin();
+	/* Unpost and free all the memory taken up */
+  unpost_n_free_menu();
 }
 
 void print_play_menu() {
@@ -443,11 +446,51 @@ void print_play_menu() {
   //lasso that controls every menu operation event
   control_play_menu();
 
-  /* Unpost and free all the memory taken up */
-  unpost_menu(my_menu);
-  for (i = 0; i < n_choices; ++i) free_item(my_items[i]);
-  free_menu(my_menu);
-  endwin();
+	/* Unpost and free all the memory taken up */
+  unpost_n_free_menu();
+}
+
+void print_loadmap_menu(){
+  // terminal_start();
+  get_window_dimensions();
+  initialize_menu3();
+
+   //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+	/* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1)); //menu position inside window
+	set_menu_format(my_menu, 5, 1); //make the menu scrollable
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+        
+	/* Post the menu */
+	attron(COLOR_PAIR(2));
+  print_footer();
+	mvprintw(LINES - 1, 0, "Use PageUp and PageDown to scoll down or up a page of items");
+	attroff(COLOR_PAIR(2));
+	post_menu(my_menu);
+	wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+	refresh();
+
+  //lasso that controls every menu operation event
+  control_mapselect_menu();
+
+	/* Unpost and free all the memory taken up */
+  unpost_n_free_menu();
 }
 
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
@@ -483,11 +526,6 @@ void play_game(tmapa *m) {
   int cor;
 
   printf("\033c");
-
-  mostra_mapa_cor(m);
-  salva_mapa(m);
-  getchar(); //just to wait showing the save path
-
 
   cor = m->mapa[0][0];
 
@@ -575,6 +613,9 @@ void config_n_generate_map(){
 
   semente = 0;
   gera_mapa(&m, semente);
+  mostra_mapa_cor(&m);
+  salva_mapa(&m); //TODO: remove from here because loaded maps will not be re-saved
+  getchar(); //just to wait showing the save path
   play_game(&m);
 }
 
@@ -598,53 +639,10 @@ static int parse_ext(const struct dirent *dir)
 }
 
 void load_map_n_play(){
-  int n_choices;
   tmapa m;
   printf("\033c");
-  get_window_dimensions();
-  initialize_menu3();
 
-   //FIXME: resize properly when in the game window
-  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
-
-  /* Create the window to be associated with the menu */
-  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
-  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
-  keypad(my_menu_win, TRUE);  // enables the use of function keys
-
-	/* Set main window and sub window */
-  set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 6, 38, 3, 1)); //menu position inside window
-	set_menu_format(my_menu, 5, 1); //make the menu scrollable
-
-  /* Print a border around the main window and print a title */
-  box(my_menu_win, 0, 0);
-  box(my_menu_win2, 0, 0);
-  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
-  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
-  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
-        
-	/* Post the menu */
-	attron(COLOR_PAIR(2));
-  print_footer();
-	mvprintw(LINES - 1, 0, "Use PageUp and PageDown to scoll down or up a page of items");
-	attroff(COLOR_PAIR(2));
-	post_menu(my_menu);
-	wrefresh(my_menu_win);
-  wrefresh(my_menu_win2);
-	refresh();
-
-  //lasso that controls every menu operation event
-  control_mapselect_menu();
-
-	/* Unpost and free all the memory taken up */
-  unpost_menu(my_menu);
-  free_menu(my_menu);
-  for(i = 0; i < n_choices; ++i) //FIXME: why do I crash in this part?
-          free_item(my_items[i]);
-	endwin();
-
+  print_loadmap_menu();
 
   carrega_mapa(&m);
 
