@@ -201,6 +201,31 @@ void carrega_mapa(tmapa *m) {
   }
 }
 
+void carrega_mapa_file(tmapa *m, const char * test) {
+  int i, j;
+  FILE *fptr;
+
+  // Open file
+  fptr = fopen(test, "r");
+  if (fptr == NULL)
+  {
+      printf("Cannot open file \n");
+      exit(0);
+  }
+
+  fscanf(fptr, "%d", &(m->nlinhas));
+  fscanf(fptr, "%d", &(m->ncolunas));
+  fscanf(fptr, "%d", &(m->ncores));
+  m->mapa = (int**) malloc(m->nlinhas * sizeof(int*));
+  for (i = 0; i < m->nlinhas; i++) {
+    m->mapa[i] = (int*) malloc(m->ncolunas * sizeof(int));
+    for (j = 0; j < m->ncolunas; j++)
+      fscanf(fptr, "%d", &(m->mapa[i][j]));
+  }
+
+  fclose(fptr);
+}
+
 void mostra_mapa(tmapa *m) {
   int i, j;
 
@@ -215,7 +240,7 @@ void mostra_mapa(tmapa *m) {
   }
 }
 
-void salva_mapa(tmapa *m){
+void salva_mapa(tmapa *m){ //TODO: organize a place to save the maps e read from, they are in the root dir
     int i, j;
     char r;
     //the space before %c clear a blank character left in a previous scanf. https://stackoverflow.com/questions/18372421/scanf-is-not-waiting-for-user-input

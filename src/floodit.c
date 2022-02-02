@@ -54,13 +54,13 @@ void initialize_menu2();
 void initialize_menu3();
 void print_main_menu();
 void print_play_menu();
-void print_loadmap_menu();
+const char * print_loadmap_menu();
 void print_footer();
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
 void control_main_menu();
 void control_play_menu();
-void control_mapselect_menu();
+const char * control_mapselect_menu();
 void unpost_n_free_menu();
 void play_game();
 void config_n_generate_map();
@@ -293,7 +293,7 @@ void control_play_menu() {
   }
 }
 
-void control_mapselect_menu(){
+const char * control_mapselect_menu(){
   while((c = wgetch(my_menu_win)) != KEY_F(2)) {
     switch(c) {	
       case KEY_DOWN:
@@ -312,7 +312,21 @@ void control_mapselect_menu(){
         wmove(my_menu_win2, 1, 1);
         wclrtoeol(my_menu_win2);
         mvwprintw(my_menu_win2, 1, 1, "Loading map %s", item_name(current_item(my_menu)));
+        werase(my_menu_win2);  // clear windoow2 output before going to play
+        refresh();
+        terminal_stop();
+
+        printf("\033c");
+
+        return item_name(current_item(my_menu));
+
+        
+
+        // break;
+        goto exit_loop; //uggly, you are a bad person
+
     }
+    // break;
     /*Reprinting some items*/
     print_footer();
     // box(my_menu_win, 0, 0);
@@ -324,6 +338,7 @@ void control_mapselect_menu(){
     wrefresh(my_menu_win2);
     refresh();
 	}
+  exit_loop: ;
 }
 
 void unpost_n_free_menu(){
@@ -450,7 +465,7 @@ void print_play_menu() {
   unpost_n_free_menu();
 }
 
-void print_loadmap_menu(){
+const char * print_loadmap_menu(){
   // terminal_start();
   get_window_dimensions();
   initialize_menu3();
@@ -487,10 +502,11 @@ void print_loadmap_menu(){
 	refresh();
 
   //lasso that controls every menu operation event
-  control_mapselect_menu();
+  const char * selected_map = control_mapselect_menu(); //TODO: create a function to load this map
 
 	/* Unpost and free all the memory taken up */
   unpost_n_free_menu();
+  return selected_map;
 }
 
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
@@ -529,9 +545,6 @@ void play_game(tmapa *m) {
 
   cor = m->mapa[0][0];
 
-  //TODO: store previous moves into array of variable size and show them
-  // int mark[] = {19, 10, 8, 17, 9};
-
   int *ptro=NULL;
   int len=2;
 
@@ -545,7 +558,7 @@ void play_game(tmapa *m) {
     printf("type -1 to exit\n\n");
     int loop;
 
-    printf("Previous Moves: ");
+    printf("Previous Moves: "); //TODO: store only previous valid moves
     for(loop = 0; loop < array_pos; loop++)
       printf("%d ", ptro[loop]);
 
@@ -614,7 +627,7 @@ void config_n_generate_map(){
   semente = 0;
   gera_mapa(&m, semente);
   mostra_mapa_cor(&m);
-  salva_mapa(&m); //TODO: remove from here because loaded maps will not be re-saved
+  salva_mapa(&m);
   getchar(); //just to wait showing the save path
   play_game(&m);
 }
@@ -642,9 +655,10 @@ void load_map_n_play(){
   tmapa m;
   printf("\033c");
 
-  print_loadmap_menu();
+  const char * test = print_loadmap_menu();
 
-  carrega_mapa(&m);
+  // carrega_mapa(&m);
+  carrega_mapa_file(&m, test);
 
   play_game(&m);
 }

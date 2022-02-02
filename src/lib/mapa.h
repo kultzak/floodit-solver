@@ -46,6 +46,7 @@ tmapa* aloca_mapa(tmapa*);
 void libera_mapa(tmapa*);
 void gera_mapa(tmapa*, int);
 void carrega_mapa(tmapa*);
+void carrega_mapa_file(tmapa*, const char *);
 void mostra_mapa(tmapa*);
 void mostra_mapa_cor(tmapa*);
 void salva_mapa(tmapa*);

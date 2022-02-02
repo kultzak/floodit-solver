@@ -275,7 +275,7 @@ tplano genetic_algorithm(tmapa mo) {
 	inc = 0.2; // fator de incremento do diversificador
 	time_t seconds = 60; // timer para teste (iniciando depois que a pop_ini é gerada)
 	int flag = 1; //0 -> desabilita a recombinação e a perturbação
-	t_busca = 20; //numero de indivíduos da busca local
+	t_busca = 20; //numero de indivíduos da busca local //TODO: investigar qual relação possui com o número de cores e verificar por que um mapa com menos de 5 cores quebra 
 
 
 	endwait = start + seconds;
