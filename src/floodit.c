@@ -185,7 +185,6 @@ void initialize_menu3() {
 }
 
 void control_main_menu() {
- //FIXME: it crashes if hit f2 after comming back from inside other menu or game
   while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
     switch (c) {
       case KEY_DOWN:
@@ -206,6 +205,7 @@ void control_main_menu() {
             terminal_stop();
 
             print_play_menu();
+            exit(0);
 
             break;
           case 2:
@@ -234,7 +234,7 @@ void control_main_menu() {
 }
 
 void control_play_menu() {
-  while ((c = wgetch(my_menu_win)) != KEY_F(2)) {
+  while ((c = wgetch(my_menu_win))) {
     switch (c) {
       case KEY_DOWN:
         menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -255,6 +255,7 @@ void control_play_menu() {
 
             config_n_generate_map();
             print_main_menu();
+            exit(0);
 
             break;
           case 1: //load map
@@ -262,9 +263,10 @@ void control_play_menu() {
             refresh();
             terminal_stop();
 
-            //TODO: separate the action of game playing from loading map or creating map
             load_map_n_play();
             print_main_menu();
+            exit(0);
+
 
             break;
           case 2: //back
@@ -274,12 +276,12 @@ void control_play_menu() {
 
             system("clear");
             print_main_menu();
+            exit(0);
 
             break;
           default:
             break;
         }
-    }
     /*Reprinting some items*/
     print_footer();
     // box(my_menu_win, 0, 0);
@@ -290,6 +292,7 @@ void control_play_menu() {
     wrefresh(my_menu_win);
     wrefresh(my_menu_win2);
     refresh();
+    }
   }
 }
 
@@ -373,7 +376,7 @@ void resizehandler(int sig) {
   /* Print a border around the main window and print a title */
   box(my_menu_win, 0, 0);
   box(my_menu_win2, 0, 0);
-  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1)); //TODO: declare menu title globally to be correclty resized
   mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
   mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
@@ -385,10 +388,10 @@ void resizehandler(int sig) {
   refresh();
 }
 
-int main() { print_main_menu(); }
+int main() {  terminal_start(); print_main_menu(); }
 
 void print_main_menu() {
-  terminal_start();
+
   get_window_dimensions();
   initialize_menu();
 
@@ -421,6 +424,9 @@ void print_main_menu() {
 
   //lasso that controls every menu operation event
   control_main_menu();
+  printf("BYE BYE");
+  getchar();
+  getchar();
 
 	/* Unpost and free all the memory taken up */
   unpost_n_free_menu();
@@ -462,7 +468,7 @@ void print_play_menu() {
   control_play_menu();
 
 	/* Unpost and free all the memory taken up */
-  unpost_n_free_menu();
+  // unpost_n_free_menu(); //free just 
 }
 
 const char * print_loadmap_menu(){
@@ -501,11 +507,11 @@ const char * print_loadmap_menu(){
   wrefresh(my_menu_win2);
 	refresh();
 
-  //lasso that controls every menu operation event
-  const char * selected_map = control_mapselect_menu(); //TODO: create a function to load this map
+                              //lasso that controls every menu operation event
+  const char * selected_map = control_mapselect_menu();
 
 	/* Unpost and free all the memory taken up */
-  unpost_n_free_menu();
+  // unpost_n_free_menu();
   return selected_map;
 }
 
@@ -537,7 +543,6 @@ void print_footer() {
 }
 
 //TODO: give option to save map and result to file
-//TODO: option to load map from file
 void play_game(tmapa *m) {
   int cor;
 
