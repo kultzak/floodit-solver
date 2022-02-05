@@ -23,9 +23,9 @@ int c;
 int n_choices, i;
 
 char *main_menu_choices[] = {
-    "Play",
+    "Play as human",
+    "Solve as non-human",
     "How to Play",
-    "Peep how GA play",
     // "Play against",
     "Options",
     "Exit",
@@ -37,14 +37,10 @@ char *play_menu_choices[] = {
     "Back",
     (char *)NULL,
 };
-
-char *choices[] = {
-      "Choice 1",
-      "Choice 2",
-      "Choice 3",
-      "Choice 4",
-			"Choice 5",
-      (char *)NULL,
+char *solvers_menu_choices[] = {
+    "Genetic algorithm",
+    "Back",
+    (char *)NULL,
 };
 
 void terminal_start();
@@ -52,14 +48,17 @@ void terminal_stop();
 void initialize_menu();
 void initialize_menu2();
 void initialize_menu3();
+void initialize_menu4();
 void print_main_menu();
 void print_play_menu();
+void print_solvers_menu();
 const char * print_loadmap_menu();
 void print_footer();
 void print_menu_title(WINDOW *win, int starty, int startx, int width,
                      char *string, chtype color);
 void control_main_menu();
 void control_play_menu();
+void control_solvers_menu();
 const char * control_mapselect_menu();
 void unpost_n_free_menu();
 void play_game();
@@ -100,10 +99,7 @@ void initialize_menu() {
   my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
   for (i = 0; i < n_choices; ++i) my_items[i] = new_item(main_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
-  item_opts_off(my_items[1],
-                O_SELECTABLE);  // turns off the named options for item; no
-                                // other option is changed.
-  // item_opts_off(my_items[2], O_SELECTABLE);
+  item_opts_off(my_items[2], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
   item_opts_off(my_items[3], O_SELECTABLE);
 
   /* Crate menu */
@@ -128,8 +124,29 @@ void initialize_menu2() {
   for (i = 0; i < n_choices; ++i) my_items[i] = new_item(play_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
   // item_opts_off(my_items[1], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
-  // item_opts_off(my_items[2], O_SELECTABLE);
-  // item_opts_off(my_items[3], O_SELECTABLE);
+
+  /* Crate menu */
+  my_menu = new_menu((ITEM **)my_items);
+
+  /* Set fore ground and back ground of the menu */
+  set_menu_fore(my_menu, COLOR_PAIR(1) | A_REVERSE);
+  set_menu_back(my_menu, COLOR_PAIR(2));
+  set_menu_grey(my_menu, COLOR_PAIR(3));
+  set_menu_mark(my_menu, " + ");
+}
+
+void initialize_menu4() {
+  /* initialize color used in menus*/
+  init_pair(1, COLOR_RED, COLOR_BLACK);
+  init_pair(2, COLOR_GREEN, COLOR_BLACK);
+  init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
+
+  /* Initialize items */
+  n_choices = ARRAY_SIZE(solvers_menu_choices);
+  my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  for (i = 0; i < n_choices; ++i) my_items[i] = new_item(solvers_menu_choices[i], "");
+  my_items[n_choices] = (ITEM *)NULL;
+  // item_opts_off(my_items[1], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
 
   /* Crate menu */
   my_menu = new_menu((ITEM **)my_items);
@@ -153,26 +170,18 @@ void initialize_menu3() {
   if (n_choices < 0) {
       perror("scandir");
   }
-  // else {
-  //     while (n--) {
-  //         printf("%s\n", namelist[n]->d_name);
-  //         free(namelist[n]);
-  //     }
-  //     free(namelist);
-  // }
   
   /* Create items */
-  // n_choices = ARRAY_SIZE(choices);
   if(n_choices < 900){ //to avoid calloc below exceeding maximum object size
     my_items = (ITEM **)calloc(n_choices+1, sizeof(ITEM *));
   }
   for(i = 0; i < n_choices; ++i)
           my_items[i] = new_item(namelist[i]->d_name,"");
-          // my_items[i] = new_item(choices[i],"");
+
   my_items[n_choices] = (ITEM *)NULL; //for some reason this null
   free(namelist);
   // item_opts_off(my_items[0], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
-  // item_opts_off(my_items[2], O_SELECTABLE);
+
   
 	/* Crate menu */
 	my_menu = new_menu((ITEM **)my_items);
@@ -208,14 +217,24 @@ void control_main_menu() {
             exit(0);
 
             break;
-          case 2:
+          case 1:
             werase(my_menu_win2);  // clear windoow2 output before going to play
             refresh();
             terminal_stop();
 
-            ga_play();
+            print_solvers_menu();
+            exit(0);
 
             break;
+
+            // werase(my_menu_win2);  // clear windoow2 output before going to play
+            // refresh();
+            // terminal_stop();
+
+            // print_solvers_menu();
+            // ga_play();
+
+            // break;
           default:
             break;
         }
@@ -296,8 +315,59 @@ void control_play_menu() {
   }
 }
 
+void control_solvers_menu() {
+  while ((c = wgetch(my_menu_win))) {
+    switch (c) {
+      case KEY_DOWN:
+        menu_driver(my_menu, REQ_DOWN_ITEM);
+        break;
+      case KEY_UP:
+        menu_driver(my_menu, REQ_UP_ITEM);
+        break;
+      case 10: /* Enter */
+        wmove(my_menu_win2, 1, 1);
+        wclrtoeol(my_menu_win2);
+        mvwprintw(my_menu_win2, 1, 1, "%s is disabled",
+                  item_name(current_item(my_menu)));
+        switch (item_index(current_item(my_menu))) {
+          case 0: //new map
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            ga_play();
+            exit(0);
+
+            break;
+          case 1: //back
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            system("clear");
+            print_main_menu();
+            exit(0);
+
+            break;
+          default:
+            break;
+        }
+    /*Reprinting some items*/
+    print_footer();
+    // box(my_menu_win, 0, 0);
+    box(my_menu_win2, 0, 0);
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+    // pos_menu_cursor(my_menu);
+    wrefresh(my_menu_win);
+    wrefresh(my_menu_win2);
+    refresh();
+    }
+  }
+}
+
 const char * control_mapselect_menu(){
-  while((c = wgetch(my_menu_win)) != KEY_F(2)) {
+  while((c = wgetch(my_menu_win))) {
     switch(c) {	
       case KEY_DOWN:
         menu_driver(my_menu, REQ_DOWN_ITEM);
@@ -311,6 +381,16 @@ const char * control_mapselect_menu(){
       case KEY_PPAGE:
         menu_driver(my_menu, REQ_SCR_UPAGE);
         break;
+      case KEY_F(2): //Back
+        werase(my_menu_win2);  // clear windoow2 output before going to play
+        refresh();
+        terminal_stop();
+
+        // system("clear");
+        print_play_menu();
+        exit(0);
+
+        break;
       case 10: /* Enter */
         wmove(my_menu_win2, 1, 1);
         wclrtoeol(my_menu_win2);
@@ -322,8 +402,6 @@ const char * control_mapselect_menu(){
         printf("\033c");
 
         return item_name(current_item(my_menu));
-
-        
 
         // break;
         goto exit_loop; //uggly, you are a bad person
@@ -471,6 +549,46 @@ void print_play_menu() {
   // unpost_n_free_menu(); //free just 
 }
 
+void print_solvers_menu(){
+   // terminal_start();
+  get_window_dimensions();
+  initialize_menu4();
+
+ //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it Solvers", COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+
+  /* Post the menu */
+  print_footer();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+  refresh();
+
+  //lasso that controls every menu operation event
+  control_solvers_menu();
+
+	/* Unpost and free all the memory taken up */
+  // unpost_n_free_menu(); //free just 
+
+}
+
 const char * print_loadmap_menu(){
   // terminal_start();
   get_window_dimensions();
@@ -498,10 +616,10 @@ const char * print_loadmap_menu(){
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
         
 	/* Post the menu */
-	attron(COLOR_PAIR(2));
+	// attron(COLOR_PAIR(2)); 
   print_footer();
-	mvprintw(LINES - 1, 0, "Use PageUp and PageDown to scoll down or up a page of items");
-	attroff(COLOR_PAIR(2));
+	// mvprintw(LINES - 1, 0, "Use PageUp and PageDown to scoll down or up a page of items"); //commented to standardize footer
+	// attroff(COLOR_PAIR(2));
 	post_menu(my_menu);
 	wrefresh(my_menu_win);
   wrefresh(my_menu_win2);
@@ -658,7 +776,7 @@ static int parse_ext(const struct dirent *dir)
 
 void load_map_n_play(){
   tmapa m;
-  printf("\033c");
+  // printf("\033c"); //hei this is aparently unnecessary
 
   const char * test = print_loadmap_menu();
 
@@ -675,7 +793,9 @@ void ga_play() {
   tmapa m;
   tplano *plan;
   int intervalo;
+  printf("\033c");
 
+  //TODO: menu with option to load some of the saved maps
   printf("Insert the map!");
 
   carrega_mapa(&m);
