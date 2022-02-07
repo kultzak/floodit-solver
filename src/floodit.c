@@ -62,7 +62,8 @@ void control_solvers_menu();
 const char * control_mapselect_menu();
 void unpost_n_free_menu();
 void play_game();
-void config_n_generate_map();
+void config_generate_map();
+void config_generate_map_n_play();
 void load_map_n_play();
 void ga_play();
 void get_window_dimensions();
@@ -252,6 +253,70 @@ void control_main_menu() {
   }
 }
 
+const char * control_solvers_play_menu(tmapa * m) {
+  while ((c = wgetch(my_menu_win))) {
+    switch (c) {
+      case KEY_DOWN:
+        menu_driver(my_menu, REQ_DOWN_ITEM);
+        break;
+      case KEY_UP:
+        menu_driver(my_menu, REQ_UP_ITEM);
+        break;
+      case 10: /* Enter */
+        wmove(my_menu_win2, 1, 1);
+        wclrtoeol(my_menu_win2);
+        mvwprintw(my_menu_win2, 1, 1, "%s is disabled",
+                  item_name(current_item(my_menu)));
+        switch (item_index(current_item(my_menu))) {
+          case 0: //new map
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            config_generate_map(m);
+            return "GERANDO UM NOVO MAPA";
+
+            break;
+          case 1: //load map
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            // load_map_n_play();
+            // print_main_menu();
+            // exit(0);
+
+            return "CARREGANDO UM MAPA JÁ EXISTENTE";
+
+
+            break;
+          case 2: //back
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
+
+            system("clear");
+            print_main_menu();
+            exit(0);
+
+            break;
+          default:
+            break;
+        }
+    /*Reprinting some items*/
+    print_footer();
+    // box(my_menu_win, 0, 0);
+    box(my_menu_win2, 0, 0);
+    mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+    mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+    // pos_menu_cursor(my_menu);
+    wrefresh(my_menu_win);
+    wrefresh(my_menu_win2);
+    refresh();
+    }
+  }
+}
+
 void control_play_menu() {
   while ((c = wgetch(my_menu_win))) {
     switch (c) {
@@ -272,7 +337,7 @@ void control_play_menu() {
             refresh();
             terminal_stop();
 
-            config_n_generate_map();
+            config_generate_map_n_play();
             print_main_menu();
             exit(0);
 
@@ -335,6 +400,7 @@ void control_solvers_menu() {
             refresh();
             terminal_stop();
 
+            system("clear");
             ga_play();
             exit(0);
 
@@ -549,6 +615,46 @@ void print_play_menu() {
   // unpost_n_free_menu(); //free just 
 }
 
+const char * print_solvers_play_menu(char * alg_name, tmapa * m) {
+  // terminal_start();
+  get_window_dimensions();
+  initialize_menu2();
+
+ //FIXME: resize properly when in the game window
+  signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
+
+  /* Create the window to be associated with the menu */
+  my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+  my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+  keypad(my_menu_win, TRUE);  // enables the use of function keys
+
+  /* Set main window and sub window */
+  set_menu_win(my_menu, my_menu_win);
+  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+
+  /* Print a border around the main window and print a title */
+  box(my_menu_win, 0, 0);
+  box(my_menu_win2, 0, 0);
+  print_menu_title(my_menu_win, 1, 0, 40, "                  ", COLOR_PAIR(1));
+  print_menu_title(my_menu_win, 1, 0, 40, alg_name, COLOR_PAIR(1));
+  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+
+  /* Post the menu */
+  print_footer();
+  post_menu(my_menu);
+  wrefresh(my_menu_win);
+  wrefresh(my_menu_win2);
+  refresh();
+
+  //lasso that controls every menu operation event
+  return control_solvers_play_menu(m);
+
+	/* Unpost and free all the memory taken up */
+  // unpost_n_free_menu(); //free just 
+}
+
 void print_solvers_menu(){
    // terminal_start();
   get_window_dimensions();
@@ -732,7 +838,7 @@ void play_game(tmapa *m) {
 
 }
 
-void config_n_generate_map(){
+void config_generate_map_n_play(){
   int semente;
   tmapa m;
   printf("\033c");
@@ -753,6 +859,29 @@ void config_n_generate_map(){
   salva_mapa(&m);
   getchar(); //just to wait showing the save path
   play_game(&m);
+}
+
+void config_generate_map(tmapa *m){
+  int semente;
+
+  printf("\033c");
+
+  printf("enter the number of lines: ");
+  scanf("%i", &m->nlinhas);
+
+  printf("enter the number of columns: ");
+  scanf("%i", &m->ncolunas);
+
+  //this scanf lets a trailing line break
+  printf("enter the number of colors: ");
+  scanf("%i", &m->ncores);
+
+  semente = 0;
+  gera_mapa(m, semente);  
+  mostra_mapa_cor(m);
+  salva_mapa(m);
+  getchar(); //just to wait showing the save path
+
 }
 
 /* when return 1, scandir will put this dirent to the list */
@@ -796,9 +925,13 @@ void ga_play() {
   printf("\033c");
 
   //TODO: menu with option to load some of the saved maps
-  printf("Insert the map!");
+  printf(print_solvers_play_menu("Genetic Algorithm",&m)); //TODO: maybe is necessary to pass also the map pointer for further map alocation see dependency injection
 
-  carrega_mapa(&m);
+  // config_generate_map(m);
+  
+  // printf("Insert the map!");
+  // carrega_mapa(&m);
+  
   plan = aloca_plano(&m);
   *plan = genetic_algorithm(m);
 
