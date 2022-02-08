@@ -101,7 +101,7 @@ void initialize_menu() {
   for (i = 0; i < n_choices; ++i) my_items[i] = new_item(main_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
   item_opts_off(my_items[2], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
-  item_opts_off(my_items[3], O_SELECTABLE);
+  // item_opts_off(my_items[3], O_SELECTABLE);
 
   /* Crate menu */
   my_menu = new_menu((ITEM **)my_items);
@@ -227,15 +227,15 @@ void control_main_menu() {
             exit(0);
 
             break;
+          case 3:
+            werase(my_menu_win2);  // clear windoow2 output before going to play
+            refresh();
+            terminal_stop();
 
-            // werase(my_menu_win2);  // clear windoow2 output before going to play
-            // refresh();
-            // terminal_stop();
+            printf("Opções: - ajustar tempo dos resolvedores\n");
+            exit(0);
 
-            // print_solvers_menu();
-            // ga_play();
-
-            // break;
+            break;
           default:
             break;
         }
@@ -286,6 +286,7 @@ const char * control_solvers_play_menu(tmapa * m) {
             // print_main_menu();
             // exit(0);
 
+            load_map(m);
             return "CARREGANDO UM MAPA JÁ EXISTENTE";
 
 
@@ -915,6 +916,16 @@ void load_map_n_play(){
   play_game(&m);
 }
 
+void load_map(tmapa * m){
+  // tmapa m;
+  // printf("\033c"); //hei this is aparently unnecessary
+
+  const char * test = print_loadmap_menu();
+
+  // carrega_mapa(&m);
+  carrega_mapa_file(m, test);
+}
+
    
 
 void ga_play() {
@@ -924,16 +935,10 @@ void ga_play() {
   int intervalo;
   printf("\033c");
 
-  //TODO: menu with option to load some of the saved maps
-  printf(print_solvers_play_menu("Genetic Algorithm",&m)); //TODO: maybe is necessary to pass also the map pointer for further map alocation see dependency injection
+  printf(print_solvers_play_menu("Genetic Algorithm",&m)); //TODO: see dependency injection insteao passing the pointer
 
-  // config_generate_map(m);
-  
-  // printf("Insert the map!");
-  // carrega_mapa(&m);
-  
   plan = aloca_plano(&m);
-  *plan = genetic_algorithm(m);
+  *plan = genetic_algorithm(m); //TODO: how to save result and how to come back after game soved?
 
   intervalo = 100;
 
