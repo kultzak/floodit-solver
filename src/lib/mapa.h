@@ -8,6 +8,7 @@ typedef struct {
   int lmax;
   int cmax;
   int **mapa;
+  const char * map_name;
 } tmapa;
 
 typedef struct {
@@ -50,7 +51,7 @@ void carrega_mapa_file(tmapa*, const char *);
 void mostra_mapa(tmapa*);
 void mostra_mapa_cor(tmapa*);
 void salva_mapa(tmapa*);
-void salva_plano();
+void salva_plano(tplano *p, const char *map_name);
 void pinta_mapa(tmapa*, int);
 
 void fronteira_mapa(tmapa*, tfronteira*);

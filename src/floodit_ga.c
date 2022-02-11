@@ -358,7 +358,7 @@ tplano genetic_algorithm(tmapa mo) {
 
 
 
-	progressbar *smooth = progressbar_new("\033cSolving", max); //create progressbar
+	progressbar *smooth = progressbar_new("\033cSolving", max); //create progressbar //FIXME: why is progressbar blinking
 
 	double diff_t = 0;
 	double old_dif = 60;

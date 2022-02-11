@@ -65,6 +65,7 @@ void play_game();
 void config_generate_map();
 void config_generate_map_n_play();
 void load_map_n_play();
+void load_map();
 void ga_play();
 void get_window_dimensions();
 void resizehandler(int);
@@ -403,6 +404,7 @@ void control_solvers_menu() {
 
             system("clear");
             ga_play();
+            print_main_menu();
             exit(0);
 
             break;
@@ -829,7 +831,7 @@ void play_game(tmapa *m) {
         pinta_mapa(m, cor);
         mostra_mapa_cor(m);
         printf("COR: ");
-        salva_plano();
+        // salva_plano();
         getchar();
         cor = -1;
     }
@@ -920,10 +922,9 @@ void load_map(tmapa * m){
   // tmapa m;
   // printf("\033c"); //hei this is aparently unnecessary
 
-  const char * test = print_loadmap_menu();
+  const char * map_name = print_loadmap_menu();
 
-  // carrega_mapa(&m);
-  carrega_mapa_file(m, test);
+  carrega_mapa_file(m, map_name);
 }
 
    
@@ -931,23 +932,27 @@ void load_map(tmapa * m){
 void ga_play() {
   int i;
   tmapa m;
+  tmapa * md;
   tplano *plan;
+  const char * map_name;
   int intervalo;
   printf("\033c");
 
-  printf(print_solvers_play_menu("Genetic Algorithm",&m)); //TODO: see dependency injection insteao passing the pointer
+  printf("%s",print_solvers_play_menu("Genetic Algorithm",&m)); //TODO: see dependency injection insteao passing the pointer
 
   plan = aloca_plano(&m);
-  *plan = genetic_algorithm(m); //TODO: how to save result and how to come back after game soved?
+  *plan = genetic_algorithm(m); //TODO: how to save result
 
   intervalo = 100;
 
-  int c;
+  // int c;
   // while ((c = getchar()) != '\n' && c != EOF){} //clear the imput buffer to
   // see last output getchar();
 
   printf("\033c");
   mostra_mapa_cor(&m);
+  md = aloca_mapa(&m);
+  copia_mapa(&m, md);
   for (i = 0; i < plan->passos; i++) {
     usleep(1000 * intervalo);
     pinta_mapa(&m, plan->cor[i]);
@@ -957,12 +962,18 @@ void ga_play() {
 
   mostra_plano(plan);
 
-  while ((c = getchar()) != '\n' && c != EOF) {
-  }  // clear the imput buffer
-  getchar();
 
-  while ((c = getchar()) != '\n' && c != EOF) {
-  }  // clear the input buffer after getchar. it avoids errors from last getchar
+  //Salvar o mapa caso não exista 
+  mostra_mapa_cor(md);
+  salva_mapa(md);
+
+  map_name = md->map_name;
+
+
+  salva_plano(plan,map_name);
+
+
+  getchar();
 
   system("clear");
   // return 0;

@@ -154,6 +154,7 @@ tmapa * aloca_mapa(tmapa *mo) {
   tmapa *md;
 
   md = (tmapa *) malloc(sizeof(tmapa));
+  md->map_name = mo->map_name;
   md->nlinhas = mo->nlinhas;
   md->ncolunas = mo->ncolunas;
   md->ncores = mo->ncores;
@@ -201,18 +202,18 @@ void carrega_mapa(tmapa *m) {
   }
 }
 
-void carrega_mapa_file(tmapa *m, const char * test) {
+void carrega_mapa_file(tmapa *m, const char * map_name) {
   int i, j;
   FILE *fptr;
 
   // Open file
-  fptr = fopen(test, "r");
+  fptr = fopen(map_name, "r");
   if (fptr == NULL)
   {
       printf("Cannot open file \n");
       exit(0);
   }
-
+  m->map_name = map_name;
   fscanf(fptr, "%d", &(m->nlinhas));
   fscanf(fptr, "%d", &(m->ncolunas));
   fscanf(fptr, "%d", &(m->ncores));
@@ -287,7 +288,7 @@ void salva_mapa(tmapa *m){ //TODO: organize a place to save the maps e read from
     }
 }
 
-void salva_plano(){
+void salva_plano(tplano *p, const char *map_name){
     char r;
     //the space before %c clear a blank character left in a previous scanf. https://stackoverflow.com/questions/18372421/scanf-is-not-waiting-for-user-input
     printf("Do you want to save this solution for this map?[y/n]");
@@ -305,12 +306,25 @@ void salva_plano(){
       FILE *fp;
       // the array is cast as a const char*.
       char result[100];   
-      strcpy(result,"Solution_"); // copy string one into the result.
-      strcat(result,".txt"); 
+      strcpy(result,map_name); // copy string one into the result.
+
+      const char ch = '.';
+
+      char * const last = strrchr(result, ch);
+      if(last != NULL)
+        *last = '\0';
+
+      strcat(result,".fldplan"); 
       fp = fopen(result, "w");
-      fprintf(fp,"Solução\n");
+
+      fprintf(fp, "%d\n", p->passos);
+      for (int i = 0; i < p->passos; i++)
+        fprintf(fp,"%d ", p->cor[i]);
+      fprintf(fp,"\n");
+
+
       fclose(fp); //Don't forget to close the file when finished
-      printf("The solution was saved as: Solution_.fldplan\n");
+      printf("The solution was saved as: %s\n", result);
       printf("Type anything to go back to main menu.");
       getchar(); //just to wait showing while the plan path 
     }
