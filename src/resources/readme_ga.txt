@@ -50,6 +50,6 @@ boards with line > 49 and > 99 respectively
 
 4) Taking into account the characteristics of the genetic algorithms the
 parameters are set for boards (30 30 10) in which it has been observed as 64 the
-minimum number of moves for the board provided by the teacher and values below
+minimum number of moves for the board provided initialy and values below
 that on similar boards. However the The approach does not guarantee efficient
 generic application.
