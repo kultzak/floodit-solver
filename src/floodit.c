@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include "lib/mapa.h"
+#include "include/mapa.h"
 
 /*genetic algorithm*/
 #include "floodit_ga.h"
@@ -456,7 +456,7 @@ const char * control_mapselect_menu(){
         terminal_stop();
 
         // system("clear");
-        print_play_menu();
+        print_play_menu(); //BUGFIX: hitting F2 makes come back to play menu even in solver loadmap menu
         exit(0);
 
         break;
@@ -535,7 +535,9 @@ void resizehandler(int sig) {
   refresh();
 }
 
-int main() {  terminal_start(); print_main_menu(); }
+int main() {  terminal_start(); 
+// print_main_menu(); 
+}
 
 void print_main_menu() {
 
@@ -963,13 +965,14 @@ void ga_play() {
   mostra_plano(plan);
 
 
-  //Salvar o mapa caso não exista 
+  //TODO: Pedir para salvar o mapa apenas caso não exista
+  //TODO: Salvar o nome do mapa caso seja seja gerado um novo
   mostra_mapa_cor(md);
   salva_mapa(md);
 
   map_name = md->map_name;
 
-
+  //TODO: Salvar plano apenas se existir mapa salvo
   salva_plano(plan,map_name);
 
 
