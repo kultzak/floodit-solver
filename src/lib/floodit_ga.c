@@ -1,13 +1,13 @@
-#include "floodit_ga.h"
+#include "../include/floodit_ga.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "lib/mapa.h"
+#include "../include/mapa.h"
 #include <time.h>
 #include <unistd.h>
 
 /* progressbar */
-#include "lib/progressbar/include/progressbar/progressbar.h"
-#include "lib/progressbar/include/progressbar/statusbar.h"
+#include "../resources/progressbar/include/progressbar/progressbar.h"
+#include "../resources/progressbar/include/progressbar/statusbar.h"
 
 #define SLEEP_US 1000000
 

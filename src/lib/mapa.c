@@ -3,7 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
-#include "lib/mapa.h"
+#include "../include/mapa.h"
 
 
 void insere_plano(tplano *p, int cor) {
