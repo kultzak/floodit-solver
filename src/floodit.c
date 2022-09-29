@@ -96,13 +96,14 @@ void initialize_menu() {
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
 
+
   /* Initialize items */
   n_choices = ARRAY_SIZE(main_menu_choices);
-  my_items = (ITEM **)calloc(n_choices, sizeof(ITEM *));
+  my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
   for (i = 0; i < n_choices; ++i) my_items[i] = new_item(main_menu_choices[i], "");
   my_items[n_choices] = (ITEM *)NULL;
   item_opts_off(my_items[2], O_SELECTABLE);  // turns off the named options for item; no other option is changed.
-  // item_opts_off(my_items[3], O_SELECTABLE);
+  //  item_opts_off(my_items[3], O_SELECTABLE);
 
   /* Crate menu */
   my_menu = new_menu((ITEM **)my_items);
@@ -536,13 +537,15 @@ void resizehandler(int sig) {
 }
 
 int main() {  terminal_start(); 
-// print_main_menu(); 
+print_main_menu(); 
 }
 
 void print_main_menu() {
 
   get_window_dimensions();
   initialize_menu();
+
+printw("Linha horizontal"); addch(ACS_HLINE); printw("\n");
 
  //FIXME: resize properly when in the game window
   signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
@@ -561,7 +564,7 @@ void print_main_menu() {
   box(my_menu_win2, 0, 0);
   print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
   mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 5);
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
 
   /* Post the menu */
