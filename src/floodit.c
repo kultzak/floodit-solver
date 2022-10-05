@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <panel.h>
 
 #include "include/mapa.h"
 
@@ -16,11 +17,14 @@
 #define CTRLD 4
 
 int termx, termy;
+int *p1, *p1_copy;
 WINDOW *my_menu_win, *my_menu_win2;
+WINDOW *my_menu_win_copy;
 ITEM **my_items;  // menu items
 MENU *my_menu;
 int c;
 int n_choices, i;
+bool is_flag_resized = false;
 
 char *main_menu_choices[] = {
     "Play as human",
@@ -95,6 +99,8 @@ void initialize_menu() {
   init_pair(1, COLOR_RED, COLOR_BLACK);
   init_pair(2, COLOR_GREEN, COLOR_BLACK);
   init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
+  p1 = 2;
+  p1_copy = 7;
 
 
   /* Initialize items */
@@ -500,40 +506,51 @@ void unpost_n_free_menu(){
 	endwin();
 }
 
-void resizehandler(int sig) {
-  terminal_stop();
-  terminal_start();
-  clear();
+void resizehandler(int sig)
+{
+    terminal_stop();
+    terminal_start();
+    clear();
 
-  get_window_dimensions();
+    get_window_dimensions();
 
-  //FIXME: create a routine to resize terminal to an area smaller than menu size
-  /* Create the window to be associated with the menu or move the existent according to desired strategy*/
-  /* recreating the window  clears the current menu state however avoid bug when
-  resizing terminal to an area smaller than the menu */
-  // my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
-  // my_menu_win2 = newwin(3, 40, 15, (termx / 2)- 20);
-  mvwin(my_menu_win, 4, (termx / 2) - 20);
-  mvwin(my_menu_win2, 15, (termx / 2) - 20);
-  keypad(my_menu_win, TRUE);  // enables the use of function keys
+    if (termx < 45) {
+        unpost_menu(my_menu);
+        is_flag_resized = true;
+    } else {
+        // FIXME: create a routine to resize terminal to an area smaller than menu size
+        /* Create the window to be associated with the menu or move the existent according to desired strategy*/
+        /* recreating the window  clears the current menu state however avoid bug when
+        resizing terminal to an area smaller than the menu */
+        if (is_flag_resized) {
+            is_flag_resized = false;
+            my_menu_win = newwin(10, 40, 4, (termx / 2) - 20);
+            my_menu_win2 = newwin(3, 40, 15, (termx / 2) - 20);
+        }
 
-  /* Set main window and sub window */
-  set_menu_win(my_menu, my_menu_win);
-  set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
+        // post_menu(my_menu);
+        mvwin(my_menu_win, 4, (termx / 2) - 20);
+        mvwin(my_menu_win2, 15, (termx / 2) - 20);
+        keypad(my_menu_win, TRUE);  // enables the use of function keys
 
-  /* Print a border around the main window and print a title */
-  box(my_menu_win, 0, 0);
-  box(my_menu_win2, 0, 0);
-  print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1)); //TODO: declare menu title globally to be correclty resized
-  mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
-  mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+        /* Set main window and sub window */
+        set_menu_win(my_menu, my_menu_win);
+        set_menu_sub(my_menu, derwin(my_menu_win, 5, 20, 3, 10));
 
-  print_footer();
-  post_menu(my_menu);
-  wrefresh(my_menu_win);
-  wrefresh(my_menu_win2);
-  refresh();
+        /* Print a border around the main window and print a title */
+        box(my_menu_win, 0, 0);
+        box(my_menu_win2, 0, 0);
+        print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));  // TODO: declare menu title globally to be correclty resized
+        mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
+        mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
+        mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
+
+        print_footer();
+        post_menu(my_menu);
+        wrefresh(my_menu_win);
+        wrefresh(my_menu_win2);
+        refresh();
+    }
 }
 
 int main() {  terminal_start(); 
@@ -545,7 +562,7 @@ void print_main_menu() {
   get_window_dimensions();
   initialize_menu();
 
-printw("Linha horizontal"); addch(ACS_HLINE); printw("\n");
+// printw("Linha horizontal"); addch(ACS_HLINE); printw("\n"); //bug no macOS
 
  //FIXME: resize properly when in the game window
   signal(SIGWINCH, resizehandler); //executes the resizehandler function at each resize signal
@@ -564,7 +581,7 @@ printw("Linha horizontal"); addch(ACS_HLINE); printw("\n");
   box(my_menu_win2, 0, 0);
   print_menu_title(my_menu_win, 1, 0, 40, "Flood-it", COLOR_PAIR(1));
   mvwaddch(my_menu_win, 2, 0, ACS_LTEE);
-  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 5);
+  mvwhline(my_menu_win, 2, 1, ACS_HLINE, 38);
   mvwaddch(my_menu_win, 2, 39, ACS_RTEE);
 
   /* Post the menu */
